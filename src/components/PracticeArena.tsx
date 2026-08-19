@@ -201,10 +201,10 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
               </div>
               <div>
                 <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-black uppercase">
-                  SOLO PRACTICE MODE
+                  CHẾ ĐỘ LUYỆN TẬP ĐƠN
                 </span>
                 <h1 className="text-2xl sm:text-3xl font-black text-white mt-1">
-                  PH�NG LUY?N T?P TRI TH?C
+                  PHÒNG LUYỆN TẬP TRI THỨC
                 </h1>
               </div>
             </div>
@@ -218,13 +218,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
           </div>
 
           <p className="text-slate-300 text-sm leading-relaxed mb-6">
-            T? do r�n luy?n tr� nh? v� ph?n x? v?i 15 chuy�n m?c tri th?c. Sau m?i c�u h?i s? c� <strong>gi?i th�ch chi ti?t</strong>. M?i c�u d�ng nh?n thu?ng <strong>+10 Coins</strong> d? t�ch luy mua s?m v?t ph?m!
+            Tự do rèn luyện trí nhớ và phản xạ với 15 chuyên mục tri thức. Sau mỗi câu hỏi sẽ có <strong>giải thích chi tiết</strong>. Mỗi câu đúng nhận thưởng <strong>+10 Coins</strong> để tích lũy mua sắm vật phẩm!
           </p>
 
           {/* 1. Category Selection */}
           <div className="space-y-3 mb-6">
             <label className="text-xs font-extrabold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Filter className="w-4 h-4 text-cyan-400" /> Ch?n Chuy�n M?c R�n Luy?n:
+              <Filter className="w-4 h-4 text-cyan-400" /> Chọn Chuyên Mục Rèn Luyện:
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
@@ -235,7 +235,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                     : 'bg-slate-900/80 text-slate-300 border-slate-800 hover:border-cyan-500/40'
                 }`}
               >
-                ?? T?t C? (Ng?u Nhi�n)
+                🌟 Tất Cả (Ngẫu Nhiên)
               </button>
               {CATEGORIES.map(c => (
                 <button
@@ -257,13 +257,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {/* Difficulty */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase">�? Kh�:</label>
+              <label className="text-xs font-bold text-slate-300 uppercase">Độ Khó:</label>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { id: 'all', label: 'Ng?u nhi�n' },
-                  { id: 'easy', label: 'D?' },
-                  { id: 'medium', label: 'V?a' },
-                  { id: 'hard', label: 'Kh�' }
+                  { id: 'all', label: 'Ngẫu nhiên' },
+                  { id: 'easy', label: 'Dễ' },
+                  { id: 'medium', label: 'Vừa' },
+                  { id: 'hard', label: 'Khó' }
                 ].map(d => (
                   <button
                     key={d.id}
@@ -282,7 +282,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
             {/* Question Count */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase">S? Lu?ng C�u:</label>
+              <label className="text-xs font-bold text-slate-300 uppercase">Số Lượng Câu:</label>
               <div className="grid grid-cols-4 gap-1.5">
                 {[5, 10, 15, 20].map(cnt => (
                   <button
@@ -294,7 +294,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                         : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-amber-500/50'
                     }`}
                   >
-                    {cnt} c�u
+                    {cnt} câu
                   </button>
                 ))}
               </div>
@@ -302,7 +302,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
             {/* Timer Toggle */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-300 uppercase">Ch? �? Gi?:</label>
+              <label className="text-xs font-bold text-slate-300 uppercase">Chế Độ Giờ:</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setHasTimer(true)}
@@ -312,7 +312,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                       : 'bg-slate-900 text-slate-400 border-slate-800'
                   }`}
                 >
-                  ?? 20 Gi�y
+                  ⏱️ 20 Giây
                 </button>
                 <button
                   onClick={() => setHasTimer(false)}
@@ -322,7 +322,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                       : 'bg-slate-900 text-slate-400 border-slate-800'
                   }`}
                 >
-                  ?? Kh�ng Gi?i H?n
+                  🧘 Không Giới Hạn
                 </button>
               </div>
             </div>
@@ -332,7 +332,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             onClick={handleStartPractice}
             className="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 via-sky-400 to-fuchsia-500 hover:from-cyan-400 hover:to-fuchsia-400 text-slate-950 font-black text-base shadow-xl shadow-cyan-500/30 hover:scale-[1.01] transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Sparkles className="w-5 h-5" /> B?T �?U LUY?N T?P NGAY
+            <Sparkles className="w-5 h-5" /> BẮT ĐẦU LUYỆN TẬP NGAY
           </button>
         </div>
       </div>
@@ -348,21 +348,21 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
       <div className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
         <div className="glass-panel rounded-3xl p-8 border border-emerald-500/40 text-center space-y-6 shadow-2xl">
           <div className="w-20 h-20 rounded-3xl bg-emerald-500/20 text-emerald-400 border-2 border-emerald-500/40 flex items-center justify-center mx-auto text-4xl shadow-lg shadow-emerald-500/20">
-            ??
+            🏆
           </div>
 
           <div>
             <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase">
-              HO�N TH�NH LUY?N T?P
+              HOÀN THÀNH LUYỆN TẬP
             </span>
             <h2 className="text-3xl font-black text-white mt-2">
-              K?T QU? R�N LUY?N
+              KẾT QUẢ RÈN LUYỆN
             </h2>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase">��ng / T?ng</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">Đúng / Tổng</div>
               <div className="text-2xl font-black text-emerald-400 mt-1 font-mono">
                 {correctCount}/{practiceHistory.length}
               </div>
@@ -370,19 +370,19 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             </div>
 
             <div className="bg-slate-900/80 rounded-2xl p-4 border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase">Chu?i D�i Nh?t</div>
+              <div className="text-xs text-slate-400 font-bold uppercase">Chuỗi Dài Nhất</div>
               <div className="text-2xl font-black text-orange-400 mt-1 font-mono flex items-center justify-center gap-1">
                 <Flame className="w-5 h-5 fill-current" /> {maxStreak}x
               </div>
-              <div className="text-[10px] text-slate-400">Combo d�ng</div>
+              <div className="text-[10px] text-slate-400">Combo đúng</div>
             </div>
 
             <div className="bg-slate-900/80 rounded-2xl p-4 border border-amber-500/30 bg-amber-950/20">
-              <div className="text-xs text-amber-400 font-bold uppercase">Thu?ng Coins</div>
+              <div className="text-xs text-amber-400 font-bold uppercase">Thưởng Coins</div>
               <div className="text-2xl font-black text-amber-300 mt-1 font-mono flex items-center justify-center gap-1">
                 <Coins className="w-5 h-5 text-amber-400" /> +{earnedCoins}
               </div>
-              <div className="text-[10px] text-slate-400">�� c?ng v�o v�</div>
+              <div className="text-[10px] text-slate-400">Đã cộng vào ví</div>
             </div>
           </div>
 
@@ -391,13 +391,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
               onClick={() => setIsConfiguring(true)}
               className="flex-1 py-3.5 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-sm transition-transform hover:scale-[1.02] flex items-center justify-center gap-2 cursor-pointer"
             >
-              <RotateCcw className="w-4 h-4" /> LUY?N T?P TI?P
+              <RotateCcw className="w-4 h-4" /> LUYỆN TẬP TIẾP
             </button>
             <button
               onClick={onExit}
               className="flex-1 py-3.5 rounded-2xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 font-bold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Home className="w-4 h-4" /> V? TRANG CH?
+              <Home className="w-4 h-4" /> VỀ TRANG CHỦ
             </button>
           </div>
         </div>
@@ -441,13 +441,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             </div>
           ) : (
             <span className="text-xs px-3 py-1.5 rounded-full bg-purple-500/20 text-purple-300 font-bold">
-              ?? Kh�ng Gi?i H?n Gi?
+              🧘 Không Giới Hạn Giờ
             </span>
           )}
 
           <div className="text-right">
             <span className="text-xs font-black text-slate-400 uppercase">
-              C�u {currentRound + 1}/{questions.length}
+              Câu {currentRound + 1}/{questions.length}
             </span>
           </div>
         </div>
@@ -455,7 +455,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
         <button
           onClick={onExit}
           className="p-2 rounded-xl bg-slate-900 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
-          title="Tho�t ph�ng luy?n t?p"
+          title="Thoát phòng luyện tập"
         >
           <Home className="w-5 h-5" />
         </button>
@@ -468,7 +468,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             {category.name}
           </span>
           <span className="text-xs text-slate-400 font-bold uppercase">
-            �? kh�: <strong className="text-cyan-400">{currentQ?.difficulty}</strong>
+            Độ khó: <strong className="text-cyan-400">{currentQ?.difficulty}</strong>
           </span>
         </div>
 
@@ -491,7 +491,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
           if (isHidden) {
             return (
               <div key={idx} className="p-4 rounded-2xl border border-slate-900 bg-slate-950/40 opacity-20 pointer-events-none">
-                <span className="line-through text-sm">--- �� B? ---</span>
+                <span className="line-through text-sm">--- ĐÃ BỎ ---</span>
               </div>
             );
           }
@@ -541,7 +541,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
                 : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
             }`}
           >
-            <Check className="w-5 h-5" /> CH?T ��P �N
+            <Check className="w-5 h-5" /> CHỐT ĐÁP ÁN
           </button>
         </div>
       ) : (
@@ -550,11 +550,11 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             <div className="flex items-center gap-2 font-black text-sm">
               {selectedOption === currentQ.correctIndex ? (
                 <span className="text-emerald-400 flex items-center gap-1.5">
-                  <Check className="w-5 h-5" /> Ch�nh x�c! (+3 di?m, +10 Coins)
+                  <Check className="w-5 h-5" /> Chính xác! (+3 điểm, +10 Coins)
                 </span>
               ) : (
                 <span className="text-rose-400 flex items-center gap-1.5">
-                  <X className="w-5 h-5" /> Chua ch�nh x�c!
+                  <X className="w-5 h-5" /> Chưa chính xác!
                 </span>
               )}
             </div>
@@ -563,13 +563,13 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
               onClick={() => setCurrentRound(prev => prev + 1)}
               className="px-6 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105 cursor-pointer"
             >
-              C�U TI?P THEO <ArrowRight className="w-4 h-4" />
+              CÂU TIẾP THEO <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           {currentQ.explanation && (
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed bg-slate-900/90 p-3.5 rounded-2xl border border-slate-800">
-              ?? <strong>Ki?n th?c ghi nh?:</strong> {currentQ.explanation}
+              💡 <strong>Kiến thức ghi nhớ:</strong> {currentQ.explanation}
             </p>
           )}
         </div>
@@ -577,7 +577,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
 
       {/* Lifelines */}
       <div className="glass-panel rounded-2xl p-2.5 border border-slate-800 flex items-center justify-center gap-3">
-        <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">Tr? gi�p:</span>
+        <span className="text-xs font-bold text-slate-400 uppercase hidden sm:inline">Trợ giúp:</span>
         <button
           onClick={useFiftyFifty}
           disabled={lifelines.fiftyFifty || phase !== 'question'}
@@ -585,7 +585,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             lifelines.fiftyFifty ? 'opacity-30 bg-slate-900 border-slate-800 cursor-not-allowed' : 'bg-slate-900 border-slate-700 text-cyan-300 hover:border-cyan-400'
           }`}
         >
-          ?? 50:50
+          🎯 50:50
         </button>
         <button
           onClick={useHint}
@@ -594,7 +594,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             lifelines.hint ? 'opacity-30 bg-slate-900 border-slate-800 cursor-not-allowed' : 'bg-slate-900 border-slate-700 text-amber-300 hover:border-amber-400'
           }`}
         >
-          ?? G?i �
+          💡 Gợi Ý
         </button>
         <button
           onClick={useRemoveOne}
@@ -603,7 +603,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
             lifelines.removeOne ? 'opacity-30 bg-slate-900 border-slate-800 cursor-not-allowed' : 'bg-slate-900 border-slate-700 text-rose-300 hover:border-rose-400'
           }`}
         >
-          ? B? 1 Sai
+          ❌ Bỏ 1 Sai
         </button>
       </div>
 
@@ -611,8 +611,8 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
       {showHint && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
           <div className="w-full max-w-sm glass-panel rounded-3xl p-6 border border-amber-400 shadow-2xl text-center space-y-3">
-            <div className="text-3xl">??</div>
-            <h4 className="text-base font-black text-amber-300 uppercase">G?I � C?A C�U H?I</h4>
+            <div className="text-3xl">💡</div>
+            <h4 className="text-base font-black text-amber-300 uppercase">GỢI Ý CỦA CÂU HỎI</h4>
             <p className="text-xs text-slate-200 bg-slate-900/90 p-4 rounded-2xl border border-slate-800">
               "{currentQ.hint}"
             </p>
@@ -620,7 +620,7 @@ export const PracticeArena: React.FC<PracticeArenaProps> = ({
               onClick={() => setShowHint(false)}
               className="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer"
             >
-              �� HI?U
+              ĐÃ HIỂU
             </button>
           </div>
         </div>
