@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { HomeView } from './components/HomeView';
 import { DuelArena } from './components/DuelArena';
+import { PracticeArena } from './components/PracticeArena';
 import { SplitScreenArena } from './components/SplitScreenArena';
 import { TournamentView } from './components/TournamentView';
 import { GrandEventArena } from './components/GrandEventArena';
@@ -14,7 +15,7 @@ import { PlayerProfile, MatchRules } from './types/game';
 import { getProfile, updatePlayerProfile } from './services/storageService';
 import { DEFAULT_QUESTIONS } from './data/defaultQuestions';
 
-type ViewMode = 'home' | 'duel' | 'split_screen' | 'tournament' | 'grand_event' | 'shop' | 'leaderboard' | 'profile' | 'master_admin';
+type ViewMode = 'home' | 'practice' | 'duel' | 'split_screen' | 'tournament' | 'grand_event' | 'shop' | 'leaderboard' | 'profile' | 'master_admin';
 
 export function App() {
   const [profile, setProfile] = useState<PlayerProfile>(getProfile);
@@ -135,7 +136,7 @@ export function App() {
       </div>
 
       {/* Main Navbar */}
-      {currentView !== 'split_screen' && currentView !== 'duel' && (
+      {currentView !== 'split_screen' && currentView !== 'duel' && currentView !== 'practice' && (
         <Navbar
           profile={profile}
           activeTab={currentView}
@@ -151,12 +152,21 @@ export function App() {
           <HomeView
             profile={profile}
             onOpenMatchmaking={handleOpenMatchmaking}
+            onOpenPractice={() => setCurrentView('practice')}
             onOpenSplitScreen={() => setCurrentView('split_screen')}
             onOpenTournament={() => setCurrentView('tournament')}
             onOpenGrandEvent={() => setCurrentView('grand_event')}
             onOpenShop={() => setCurrentView('shop')}
             onOpenLeaderboard={() => setCurrentView('leaderboard')}
             onOpenProfile={() => setCurrentView('profile')}
+          />
+        )}
+
+        {currentView === 'practice' && (
+          <PracticeArena
+            profile={profile}
+            onUpdateProfile={handleUpdateProfile}
+            onExit={() => navigateTo('home')}
           />
         )}
 

@@ -7,6 +7,7 @@ import { MatchmakingModal } from './MatchmakingModal';
 interface HomeViewProps {
   profile: PlayerProfile;
   onOpenMatchmaking: (mode: 'random' | 'friend' | 'ai') => void;
+  onOpenPractice: () => void;
   onOpenSplitScreen: () => void;
   onOpenTournament: () => void;
   onOpenGrandEvent: () => void;
@@ -18,9 +19,12 @@ interface HomeViewProps {
 export const HomeView: React.FC<HomeViewProps> = ({
   profile,
   onOpenMatchmaking,
+  onOpenPractice,
   onOpenSplitScreen,
   onOpenTournament,
   onOpenGrandEvent,
+  onOpenShop,
+  onOpenLeaderboard,
   onOpenProfile
 }) => {
   const proficiencies = getCategoryProficiencies(profile.statsOnline);
@@ -49,20 +53,27 @@ export const HomeView: React.FC<HomeViewProps> = ({
             20 giây mỗi câu. Người nhanh hơn đúng nhận <strong className="text-cyan-400 font-black">+3 điểm</strong>, người sau đúng <strong className="text-slate-200">+1 điểm</strong>. Loại bỏ gian lận tìm kiếm bằng phản xạ tri thức đích thực!
           </p>
 
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => onOpenMatchmaking('random')}
-              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-cyan-500/30 hover:scale-105 transition-all flex items-center gap-2.5"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-slate-950 font-black text-sm sm:text-base shadow-xl shadow-cyan-500/30 hover:scale-105 transition-all flex items-center gap-2.5 cursor-pointer"
             >
               <Swords className="w-5 h-5" />
               GHÉP TRẬN RANKED 1v1
             </button>
             <button
-              onClick={() => onOpenMatchmaking('friend')}
-              className="px-6 py-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-100 font-bold text-sm sm:text-base hover:border-cyan-500/50 transition-all flex items-center gap-2"
+              onClick={onOpenPractice}
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm sm:text-base shadow-lg shadow-emerald-500/20 hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <Users className="w-5 h-5 text-cyan-400" />
-              ĐẤU BẠN BÈ (MÃ PHÒNG)
+              <Target className="w-5 h-5" />
+              LUYỆN TẬP 1 MÌNH (+COINS)
+            </button>
+            <button
+              onClick={() => onOpenMatchmaking('friend')}
+              className="px-5 py-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-100 font-bold text-sm hover:border-cyan-500/50 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Users className="w-4 h-4 text-cyan-400" />
+              ĐẤU BẠN BÈ
             </button>
           </div>
         </div>
@@ -71,41 +82,60 @@ export const HomeView: React.FC<HomeViewProps> = ({
       {/* Main Game Modes Grid */}
       <div>
         <h2 className="text-xl font-extrabold text-slate-100 tracking-wide mb-4 flex items-center gap-2">
-          <Flame className="w-5 h-5 text-orange-400" /> CÁC CHẾ ĐỘ THI ĐẤU
+          <Flame className="w-5 h-5 text-orange-400" /> CÁC CHẾ ĐỘ THI ĐẤU & RÈN LUYỆN
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          {/* Mode 0: Solo Practice */}
+          <div
+            onClick={onOpenPractice}
+            className="group glass-panel rounded-2xl p-5 border border-teal-500/30 hover:border-teal-400 cursor-pointer hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300 relative overflow-hidden"
+          >
+            <div className="w-11 h-11 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 mb-3 group-hover:scale-110 transition-transform">
+              <Target className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-teal-300 transition-colors">
+              Luyện Tập 1 Mình
+            </h3>
+            <p className="text-xs text-slate-400 mb-3">
+              Tự chọn 15 chuyên mục, xem giải thích chi tiết, nhận thưởng +10 Coins/câu.
+            </p>
+            <div className="flex items-center text-xs font-bold text-teal-400 gap-1 group-hover:translate-x-1 transition-transform">
+              Vào luyện tập <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+
           {/* Mode 1: Ranked 1v1 */}
           <div
             onClick={() => onOpenMatchmaking('random')}
-            className="group glass-panel rounded-2xl p-6 border border-cyan-500/20 hover:border-cyan-400 cursor-pointer hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 relative overflow-hidden"
+            className="group glass-panel rounded-2xl p-5 border border-cyan-500/20 hover:border-cyan-400 cursor-pointer hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 relative overflow-hidden"
           >
-            <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 mb-3 group-hover:scale-110 transition-transform">
               <Swords className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
-              Đấu Hạng 1v1 Ngẫu Nhiên
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+              Đấu Hạng 1v1
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 mb-3">
               Cộng trừ ELO theo chuẩn quốc tế. Gặp gỡ các cao thủ cùng trình độ.
             </p>
             <div className="flex items-center text-xs font-bold text-cyan-400 gap-1 group-hover:translate-x-1 transition-transform">
-              Tham gia ngay <ArrowRight className="w-4 h-4" />
+              Ghép trận ngay <ArrowRight className="w-4 h-4" />
             </div>
           </div>
 
           {/* Mode 2: Bot AI Battle */}
           <div
             onClick={() => onOpenMatchmaking('ai')}
-            className="group glass-panel rounded-2xl p-6 border border-emerald-500/20 hover:border-emerald-400 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden"
+            className="group glass-panel rounded-2xl p-5 border border-emerald-500/20 hover:border-emerald-400 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden"
           >
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
               <Bot className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1 group-hover:text-emerald-300 transition-colors">
-              Đấu Với Trí Tuệ AI
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-emerald-300 transition-colors">
+              Đấu Với AI
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              3 cấp độ Tập sự, Cao thủ, Thần đồng. Luyện phản xạ tức thì không cần chờ mạng.
+            <p className="text-xs text-slate-400 mb-3">
+              3 cấp độ Tập sự, Cao thủ, Thần đồng. Luyện phản xạ tức thì không chờ mạng.
             </p>
             <div className="flex items-center text-xs font-bold text-emerald-400 gap-1 group-hover:translate-x-1 transition-transform">
               Thách đấu AI <ArrowRight className="w-4 h-4" />
@@ -115,35 +145,35 @@ export const HomeView: React.FC<HomeViewProps> = ({
           {/* Mode 3: Split Screen 2P */}
           <div
             onClick={onOpenSplitScreen}
-            className="group glass-panel rounded-2xl p-6 border border-purple-500/20 hover:border-purple-400 cursor-pointer hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 relative overflow-hidden"
+            className="group glass-panel rounded-2xl p-5 border border-purple-500/20 hover:border-purple-400 cursor-pointer hover:shadow-xl hover:shadow-purple-500/10 transition-all duration-300 relative overflow-hidden"
           >
-            <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 mb-3 group-hover:scale-110 transition-transform">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1 group-hover:text-purple-300 transition-colors">
-              2 Người Chung 1 Màn Hình
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-purple-300 transition-colors">
+              2P Chia Màn Hình
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 mb-3">
               Chia đôi màn hình chơi cùng bạn bè trên máy tính / tablet / điện thoại.
             </p>
             <div className="flex items-center text-xs font-bold text-purple-400 gap-1 group-hover:translate-x-1 transition-transform">
-              Chơi ngay <ArrowRight className="w-4 h-4" />
+              Chơi 2 người <ArrowRight className="w-4 h-4" />
             </div>
           </div>
 
           {/* Mode 4: Knockout Tournament */}
           <div
             onClick={onOpenTournament}
-            className="group glass-panel rounded-2xl p-6 border border-amber-500/20 hover:border-amber-400 cursor-pointer hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 relative overflow-hidden"
+            className="group glass-panel rounded-2xl p-5 border border-amber-500/20 hover:border-amber-400 cursor-pointer hover:shadow-xl hover:shadow-amber-500/10 transition-all duration-300 relative overflow-hidden"
           >
-            <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 group-hover:scale-110 transition-transform">
               <Trophy className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-1 group-hover:text-amber-300 transition-colors">
-              Đại Hội Giải Đấu (4 - 64)
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-amber-300 transition-colors">
+              Đại Hội Giải Đấu
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Nhánh đấu loại trực tiếp, luật Sân nhà/Sân khách lượt đi-về, chế độ Trọng tài xem trực tiếp.
+            <p className="text-xs text-slate-400 mb-3">
+              Nhánh Knockout 4 - 64 người, Free Win (Byes), Trọng tài xem trực tiếp.
             </p>
             <div className="flex items-center text-xs font-bold text-amber-400 gap-1 group-hover:translate-x-1 transition-transform">
               Sảnh giải đấu <ArrowRight className="w-4 h-4" />

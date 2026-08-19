@@ -142,6 +142,47 @@ export const recordMatchResult = (
   return { eloDelta, coinReward };
 };
 
+// Record Practice Mode Results
+export const recordPracticeResult = (
+  answeredQuestions: { categoryIds: number[]; isCorrect: boolean }[],
+  longestStreak: number
+): { coinReward: number; correctCount: number; totalCount: number } => {
+  const profile = getProfile();
+  const stats = profile.statsOffline;
+
+  let correctCount = 0;
+  answeredQuestions.forEach(q => {
+    stats.totalQuestions++;
+    if (q.isCorrect) {
+      stats.correctQuestions++;
+      correctCount++;
+    }
+
+    q.categoryIds.forEach(catId => {
+      if (!stats.categoryStats[catId]) {
+        stats.categoryStats[catId] = { total: 0, correct: 0 };
+      }
+      stats.categoryStats[catId].total++;
+      if (q.isCorrect) {
+        stats.categoryStats[catId].correct++;
+      }
+    });
+  });
+
+  if (longestStreak > (stats.highestStreak || 0)) {
+    stats.highestStreak = longestStreak;
+  }
+
+  // Practice Coin reward: 10 coins/câu đúng + streak bonus
+  const streakBonus = longestStreak >= 5 ? 30 : longestStreak >= 3 ? 15 : 0;
+  const coinReward = (correctCount * 10) + streakBonus;
+  profile.coins += coinReward;
+
+  saveProfile(profile);
+  return { coinReward, correctCount, totalCount: answeredQuestions.length };
+};
+
+
 // Fact Hunter Reports
 export const submitQuestionReport = (questionId: string, questionText: string, reason: string): QuestionReport => {
   const profile = getProfile();
