@@ -37,11 +37,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'samequiz_super_secret_jwt_key_2026
 // === SUPABASE POSTGRESQL POOL ===
 const { Pool } = pg;
 const dbPool = new Pool({
-  host: process.env.PGHOST || 'db.scermrxgqoyohloylijl.supabase.co',
-  port: parseInt(process.env.PGPORT || '5432', 10),
+  host: process.env.PGHOST || 'aws-0-ap-southeast-1.pooler.supabase.com',
+  port: parseInt(process.env.PGPORT || '6543', 10),
   database: process.env.PGDATABASE || 'postgres',
-  user: process.env.PGUSER || 'postgres',
-  password: process.env.PGPASSWORD || 'MatKhauDay123',
+  user: process.env.PGUSER || 'postgres.scermrxgqoyohloylijl',
+  password: process.env.PGPASSWORD || 'MatKhauDay1234@',
   ssl: { rejectUnauthorized: false },
   max: 10,
   idleTimeoutMillis: 30000,
@@ -55,8 +55,9 @@ async function initPostgres() {
     const client = await dbPool.connect();
     console.log('✅ [POSTGRESQL] Đã kết nối thành công tới Supabase Database!');
     
+    // 1. Users Table
     await client.query(`
-      CREATE TABLE IF NOT EXISTS users (
+      CREATE TABLE IF NOT EXISTS public.users (
         id VARCHAR(64) PRIMARY KEY,
         username VARCHAR(50) UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
@@ -74,16 +75,79 @@ async function initPostgres() {
         created_at TIMESTAMPTZ DEFAULT NOW(),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
-      CREATE INDEX IF NOT EXISTS idx_users_elo ON users (elo DESC);
-      CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
+    `);
+
+    // 2. Questions Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.questions (
+        id VARCHAR(64) PRIMARY KEY,
+        question TEXT NOT NULL,
+        options JSONB NOT NULL,
+        correct_index INTEGER NOT NULL,
+        explanation TEXT,
+        hint TEXT,
+        category_ids JSONB DEFAULT '[]'::jsonb,
+        difficulty VARCHAR(20) DEFAULT 'medium',
+        time_limit INTEGER DEFAULT 20,
+        is_verified BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // 3. Question Reports (Fact Hunter) Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.question_reports (
+        id VARCHAR(64) PRIMARY KEY,
+        question_id VARCHAR(64),
+        question_text TEXT,
+        reporter_id VARCHAR(64),
+        reason TEXT NOT NULL,
+        status VARCHAR(20) DEFAULT 'pending',
+        reward_coins INTEGER DEFAULT 500,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // 4. Shop Items Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.shop_items (
+        id VARCHAR(64) PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        type VARCHAR(30) NOT NULL,
+        price INTEGER NOT NULL,
+        icon TEXT,
+        style_class TEXT,
+        is_available BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // 5. Grand Events Table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS public.grand_events (
+        id VARCHAR(64) PRIMARY KEY,
+        title VARCHAR(150) NOT NULL,
+        category_id INTEGER,
+        ticket_price INTEGER DEFAULT 100,
+        reward_pool INTEGER DEFAULT 10000,
+        status VARCHAR(30) DEFAULT 'scheduled',
+        start_at TIMESTAMPTZ,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+
+    // 6. Indexes
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_users_elo ON public.users (elo DESC);
+      CREATE INDEX IF NOT EXISTS idx_users_username ON public.users (username);
+      CREATE INDEX IF NOT EXISTS idx_reports_status ON public.question_reports (status);
     `);
     
-    console.log('✅ [POSTGRESQL] Schema bảng users Supabase đã sẵn sàng!');
+    console.log('✅ [POSTGRESQL] Toàn bộ Schema bảng Supabase đã khởi tạo thành công!');
     client.release();
     isPostgresReady = true;
   } catch (err) {
-    console.warn('⚠️ [POSTGRESQL] Chưa kết nối được Supabase:', err.message);
-    console.warn('⚠️ Server sẽ kích hoạt bộ nhớ đệm dự phòng để đảm bảo tính năng đăng ký/đăng nhập hoạt động trơn tru.');
+    console.warn('⚠️ [POSTGRESQL] Lỗi kết nối Supabase:', err.message);
     isPostgresReady = false;
   }
 }
