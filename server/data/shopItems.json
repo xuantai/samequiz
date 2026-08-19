@@ -1,0 +1,142 @@
+[
+  {
+    "id": "item_av_cyber",
+    "name": "Avatar Cyber Ninja",
+    "category": "avatar",
+    "price": 500,
+    "currency": "coin",
+    "imageOrValue": "🤖",
+    "description": "Chiến binh mạng tương lai với ánh mắt laser xanh cyan",
+    "badge": "HOT"
+  },
+  {
+    "id": "item_av_scholar",
+    "name": "Avatar Trạng Nguyên",
+    "category": "avatar",
+    "price": 800,
+    "currency": "coin",
+    "imageOrValue": "🎓",
+    "description": "Trang phục Trạng Nguyên tiến sĩ đỗ đạt bảng vàng",
+    "badge": "VIP"
+  },
+  {
+    "id": "item_av_king",
+    "name": "Avatar Hoàng Đế Tri Thức",
+    "category": "avatar",
+    "price": 1500,
+    "currency": "coin",
+    "imageOrValue": "👑",
+    "description": "Vương miện hoàng gia dành cho các bậc đế vương trí tuệ",
+    "badge": "LEGEND"
+  },
+  {
+    "id": "item_av_samurai",
+    "name": "Avatar Samurai Tốc Độ",
+    "category": "avatar",
+    "price": 600,
+    "currency": "coin",
+    "imageOrValue": "⚔️",
+    "description": "Phản xạ chớp nhoáng với tinh thần võ sĩ đạo",
+    "badge": "NEW"
+  },
+  {
+    "id": "item_frame_neon",
+    "name": "Khung Neon Cyan",
+    "category": "frame",
+    "price": 400,
+    "currency": "coin",
+    "imageOrValue": "border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]",
+    "description": "Khung phát sáng tia sét màu xanh neon nổi bật",
+    "badge": "POPULAR"
+  },
+  {
+    "id": "item_frame_gold",
+    "name": "Khung Rồng Vàng Huyền Thoại",
+    "category": "frame",
+    "price": 1200,
+    "currency": "coin",
+    "imageOrValue": "border-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.8)]",
+    "description": "Khung mạ vàng 24K quyền quý lấp lánh",
+    "badge": "LEGEND"
+  },
+  {
+    "id": "item_frame_fire",
+    "name": "Khung Hỏa Long Bốc Lửa",
+    "category": "frame",
+    "price": 900,
+    "currency": "coin",
+    "imageOrValue": "border-red-500 shadow-[0_0_18px_rgba(239,68,68,0.7)]",
+    "description": "Khung hiệu ứng lửa cháy rực cháy khí thế",
+    "badge": "HOT"
+  },
+  {
+    "id": "item_frame_purple",
+    "name": "Khung Ma Thuật Tím",
+    "category": "frame",
+    "price": 500,
+    "currency": "coin",
+    "imageOrValue": "border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.6)]",
+    "description": "Khung ma thuật bí ẩn dành cho các bậc thầy",
+    "badge": "NEW"
+  },
+  {
+    "id": "item_title_god",
+    "name": "Danh hiệu: Thần Đoán Chớp Nhoáng",
+    "category": "title",
+    "price": 1000,
+    "currency": "coin",
+    "imageOrValue": "text-amber-300 font-extrabold tracking-wide neon-text-gold",
+    "description": "Tên hiển thị phát sáng vàng lấp lánh khi vào trận",
+    "badge": "EPIC"
+  },
+  {
+    "id": "item_title_brain",
+    "name": "Danh hiệu: Não Siêu Vũ Trụ",
+    "category": "title",
+    "price": 800,
+    "currency": "coin",
+    "imageOrValue": "text-cyan-300 font-bold tracking-wide neon-text-cyan",
+    "description": "Tên hiển thị phát sáng xanh Cyber tương lai",
+    "badge": "HOT"
+  },
+  {
+    "id": "item_title_hunter",
+    "name": "Danh hiệu: Đại Thợ Săn Lỗi",
+    "category": "title",
+    "price": 1500,
+    "currency": "coin",
+    "imageOrValue": "text-emerald-400 font-bold",
+    "description": "Vinh danh người bảo vệ sự chuẩn xác của tri thức",
+    "badge": "SPECIAL"
+  },
+  {
+    "id": "item_card_rename",
+    "name": "Thẻ Đổi Tên Nhân Vật",
+    "category": "card",
+    "price": 300,
+    "currency": "coin",
+    "imageOrValue": "🏷️",
+    "description": "Cho phép đổi tên tài khoản ngay lập tức",
+    "badge": "ESSENTIAL"
+  },
+  {
+    "id": "item_ticket_football",
+    "name": "Vé Đại Sự Kiện: Vua Bóng Đá",
+    "category": "ticket",
+    "price": 200,
+    "currency": "coin",
+    "imageOrValue": "🎟️",
+    "description": "Vé tham gia giải đấu Battle Royale Vua Bóng Đá tối Thứ Bảy",
+    "badge": "EVENT"
+  },
+  {
+    "id": "item_ticket_history",
+    "name": "Vé Đại Sự Kiện: Vua Lịch Sử",
+    "category": "ticket",
+    "price": 200,
+    "currency": "coin",
+    "imageOrValue": "🎟️",
+    "description": "Vé tham gia giải đấu Battle Royale Vua Lịch Sử tối Chủ Nhật",
+    "badge": "EVENT"
+  }
+]

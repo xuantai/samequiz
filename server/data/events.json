@@ -1,0 +1,44 @@
+[
+  {
+    "id": "evt_football_king",
+    "title": "Đại Chiến: Vua Bóng Đá 2026",
+    "themeCategoryIds": [
+      8
+    ],
+    "scheduledTime": "20:00 Tối Thứ Bảy hàng tuần",
+    "ticketPrice": 200,
+    "prizePool": 50000,
+    "status": "upcoming",
+    "registeredPlayerCount": 128,
+    "totalRounds": 15
+  },
+  {
+    "id": "evt_history_master",
+    "title": "Đại Hội: Hào Khí Việt Nam & Thế Giới",
+    "themeCategoryIds": [
+      1,
+      2
+    ],
+    "scheduledTime": "20:00 Tối Chủ Nhật hàng tuần",
+    "ticketPrice": 200,
+    "prizePool": 60000,
+    "status": "upcoming",
+    "registeredPlayerCount": 164,
+    "totalRounds": 15
+  },
+  {
+    "id": "evt_tech_ai",
+    "title": "Siêu Trí Tuệ: Kỷ Nguyên AI & Công Nghệ",
+    "themeCategoryIds": [
+      4,
+      3,
+      14
+    ],
+    "scheduledTime": "20:30 Tối Thứ Tư hàng tuần",
+    "ticketPrice": 150,
+    "prizePool": 40000,
+    "status": "upcoming",
+    "registeredPlayerCount": 95,
+    "totalRounds": 12
+  }
+]

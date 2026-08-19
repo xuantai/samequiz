@@ -1,0 +1,567 @@
+import { Question } from "../types/game";
+
+export const DEFAULT_QUESTIONS: Question[] = [
+  {
+    "id": "q_1",
+    "country": "VN",
+    "categoryIds": [
+      1,
+      2
+    ],
+    "difficulty": "easy",
+    "question": "Chiến thắng lịch sử Điện Biên Phủ năm 1954 gắn liền với vị tướng vĩ đại nào của dân tộc ta?",
+    "options": [
+      "Đại tướng Võ Nguyên Giáp",
+      "Đại tướng Văn Tiến Dũng",
+      "Đại tướng Nguyễn Chí Thanh",
+      "Đại tướng Chu Huy Mân"
+    ],
+    "correctIndex": 0,
+    "hint": "Vị tướng được mệnh danh là Người anh cả của Quân đội Nhân dân Việt Nam.",
+    "explanation": "Đại tướng Võ Nguyên Giáp là Tổng tư lệnh chiến dịch Điện Biên Phủ \"lừng lẫy năm châu, chấn động địa cầu\"."
+  },
+  {
+    "id": "q_2",
+    "country": "VN",
+    "categoryIds": [
+      1,
+      11
+    ],
+    "difficulty": "medium",
+    "question": "Loại quả nào gắn liền với vụ án oan nổi tiếng thời Lê sơ khiến gia tộc danh nhân Nguyễn Trãi bị tru di tam tộc?",
+    "options": [
+      "Quả Nhãn",
+      "Quả Vải",
+      "Quả Mận",
+      "Quả Mít"
+    ],
+    "correctIndex": 1,
+    "hint": "Khu vườn xảy ra vụ án mang tên Hán-Việt là Lệ Chi Viên.",
+    "explanation": "Vụ án Lệ Chi Viên (Vườn Vải) xảy ra năm 1442 sau khi vua Lê Thái Tông băng hà tại nhà riêng của Nguyễn Trãi."
+  },
+  {
+    "id": "q_3",
+    "country": "VN",
+    "categoryIds": [
+      1,
+      2
+    ],
+    "difficulty": "hard",
+    "question": "Trận Như Nguyệt năm 1077 do Lý Thường Kiệt lãnh đạo chống quân Tống diễn ra trên con sông nào ngày nay?",
+    "options": [
+      "Sông Hồng",
+      "Sông Đuống",
+      "Sông Cầu",
+      "Sông Mã"
+    ],
+    "correctIndex": 2,
+    "hint": "Con sông này còn được gọi là sông Như Nguyệt, chảy qua Bắc Ninh và Bắc Giang.",
+    "explanation": "Sông Cầu là dòng sông nơi Lý Thường Kiệt xây dựng phòng tuyến đánh tan 30 vạn quân xâm lược nhà Tống."
+  },
+  {
+    "id": "q_4",
+    "country": "GLOBAL",
+    "categoryIds": [
+      2,
+      10
+    ],
+    "difficulty": "easy",
+    "question": "Thủ đô của nước Úc (Australia) là thành phố nào?",
+    "options": [
+      "Sydney",
+      "Melbourne",
+      "Canberra",
+      "Brisbane"
+    ],
+    "correctIndex": 2,
+    "hint": "Không phải là thành phố đông dân nhất như Sydney hay Melbourne.",
+    "explanation": "Canberra được chọn làm thủ đô của Úc vào năm 1908 như một sự thỏa hiệp giữa Sydney và Melbourne."
+  },
+  {
+    "id": "q_5",
+    "country": "GLOBAL",
+    "categoryIds": [
+      2,
+      10
+    ],
+    "difficulty": "medium",
+    "question": "Kỳ quan thế giới Taj Mahal tọa lạc tại quốc gia nào?",
+    "options": [
+      "Ai Cập",
+      "Thổ Nhĩ Kỳ",
+      "Ấn Độ",
+      "Iran"
+    ],
+    "correctIndex": 2,
+    "hint": "Lăng mộ bằng đá cẩm thạch trắng do Hoàng đế Shah Jahan xây dựng bên bờ sông Yamuna.",
+    "explanation": "Taj Mahal nằm ở thành phố Agra, Ấn Độ, được UNESCO công nhận là Di sản Thế giới năm 1983."
+  },
+  {
+    "id": "q_6",
+    "country": "GLOBAL",
+    "categoryIds": [
+      3,
+      4
+    ],
+    "difficulty": "easy",
+    "question": "Công thức hóa học của nước là gì?",
+    "options": [
+      "CO2",
+      "H2O",
+      "NaCl",
+      "O2"
+    ],
+    "correctIndex": 1,
+    "hint": "Gồm 2 nguyên tử Hydro và 1 nguyên tử Oxy.",
+    "explanation": "Nước là hợp chất tạo bởi 2 nguyên tử hydro liên kết cộng hóa trị với 1 nguyên tử oxy (H2O)."
+  },
+  {
+    "id": "q_7",
+    "country": "GLOBAL",
+    "categoryIds": [
+      4,
+      13
+    ],
+    "difficulty": "easy",
+    "question": "Ai được coi là cha đẻ của mạng toàn cầu World Wide Web (WWW)?",
+    "options": [
+      "Bill Gates",
+      "Steve Jobs",
+      "Tim Berners-Lee",
+      "Alan Turing"
+    ],
+    "correctIndex": 2,
+    "hint": "Nhà khoa học máy tính người Anh đã phát minh ra WWW tại phòng thí nghiệm CERN năm 1989.",
+    "explanation": "Sir Tim Berners-Lee đã phát minh ra World Wide Web vào năm 1989 tại CERN."
+  },
+  {
+    "id": "q_8",
+    "country": "GLOBAL",
+    "categoryIds": [
+      4,
+      14
+    ],
+    "difficulty": "medium",
+    "question": "Thử nghiệm nào được dùng để kiểm tra khả năng trí tuệ nhân tạo (AI) có thể đạt mức không phân biệt được với con người?",
+    "options": [
+      "Thử nghiệm Turing",
+      "Thử nghiệm Faraday",
+      "Thử nghiệm Tesla",
+      "Thử nghiệm Schrödinger"
+    ],
+    "correctIndex": 0,
+    "hint": "Đặt theo tên nhà toán học lỗi lạc người Anh đã giải mã cỗ máy Enigma.",
+    "explanation": "Turing Test được Alan Turing đề xuất năm 1950 trong bài báo \"Computing Machinery and Intelligence\"."
+  },
+  {
+    "id": "q_9",
+    "country": "GLOBAL",
+    "categoryIds": [
+      3
+    ],
+    "difficulty": "hard",
+    "question": "Hạt hạ nguyên tử nào mang điện tích âm và quay quanh hạt nhân nguyên tử?",
+    "options": [
+      "Proton",
+      "Neutron",
+      "Electron",
+      "Quark"
+    ],
+    "correctIndex": 2,
+    "hint": "Do nhà vật lý J.J. Thomson phát hiện năm 1897.",
+    "explanation": "Electron (điện tử) mang điện tích âm và chuyển động trong lớp vỏ nguyên tử."
+  },
+  {
+    "id": "q_10",
+    "country": "GLOBAL",
+    "categoryIds": [
+      8,
+      7
+    ],
+    "difficulty": "easy",
+    "question": "Đội tuyển quốc gia nào giành chức vô địch FIFA World Cup 2022 tại Qatar?",
+    "options": [
+      "Pháp",
+      "Brazil",
+      "Argentina",
+      "Croatia"
+    ],
+    "correctIndex": 2,
+    "hint": "Đội bóng của siêu sao Lionel Messi trong trận chung kết kịch tính trên sân Lusail.",
+    "explanation": "Argentina đã đánh bại Pháp trên chấm luân lưu 11m sau tỷ số hòa 3-3 nghẹt thở."
+  },
+  {
+    "id": "q_11",
+    "country": "GLOBAL",
+    "categoryIds": [
+      8,
+      13
+    ],
+    "difficulty": "medium",
+    "question": "Cầu thủ nào đang giữ kỷ lục giành nhiều Quả Bóng Vàng (Ballon d'Or) nhất trong lịch sử bóng đá?",
+    "options": [
+      "Cristiano Ronaldo",
+      "Lionel Messi",
+      "Pelé",
+      "Diego Maradona"
+    ],
+    "correctIndex": 1,
+    "hint": "Ngôi sao người Argentina với kỷ lục vô tiền khoáng hậu 8 Quả Bóng Vàng.",
+    "explanation": "Lionel Messi đã giành 8 Quả Bóng Vàng vào các năm 2009, 2010, 2011, 2012, 2015, 2019, 2021, 2023."
+  },
+  {
+    "id": "q_12",
+    "country": "VN",
+    "categoryIds": [
+      8,
+      7
+    ],
+    "difficulty": "easy",
+    "question": "Giải đấu U23 Châu Á năm 2018 tại Thường Châu, ĐT U23 Việt Nam dưới sự dẫn dắt của HLV nào đã lập nên kỳ tích Á quân?",
+    "options": [
+      "HLV Henrique Calisto",
+      "HLV Park Hang-seo",
+      "HLV Philippe Troussier",
+      "HLV Toshiya Miura"
+    ],
+    "correctIndex": 1,
+    "hint": "Vị chiến lược gia người Hàn Quốc mở ra kỷ nguyên thành công rực rỡ của bóng đá Việt Nam.",
+    "explanation": "HLV Park Hang-seo đã đưa U23 Việt Nam vào đến trận chung kết tuyết trắng Thường Châu 2018."
+  },
+  {
+    "id": "q_13",
+    "country": "GLOBAL",
+    "categoryIds": [
+      7
+    ],
+    "difficulty": "medium",
+    "question": "Kỷ lục gia Olympic chạy nước rút 100m người Jamaica với biệt danh \"Tia chớp\" là ai?",
+    "options": [
+      "Carl Lewis",
+      "Usain Bolt",
+      "Tyson Gay",
+      "Asafa Powell"
+    ],
+    "correctIndex": 1,
+    "hint": "Người đang nắm giữ kỷ lục thế giới 100m với thời gian 9.58 giây tại Berlin 2009.",
+    "explanation": "Usain Bolt là vận động viên chạy cự ly ngắn vĩ đại nhất mọi thời đại với 8 HCV Olympic."
+  },
+  {
+    "id": "q_14",
+    "country": "VN",
+    "categoryIds": [
+      5,
+      13
+    ],
+    "difficulty": "easy",
+    "question": "Kiệt tác thơ Nôm \"Đoạn trường tân thanh\" (Truyện Kiều) là tác phẩm bất hủ của Đại thi hào nào?",
+    "options": [
+      "Nguyễn Trãi",
+      "Nguyễn Du",
+      "Hồ Xuân Hương",
+      "Nguyễn Bỉnh Khiêm"
+    ],
+    "correctIndex": 1,
+    "hint": "Danh nhân văn hóa thế giới sinh năm 1765 tại làng Tiên Điền, Nghi Xuân, Hà Tĩnh.",
+    "explanation": "Đại thi hào Nguyễn Du (1765–1820) là tác giả của Truyện Kiều gồm 3254 câu lục bát."
+  },
+  {
+    "id": "q_15",
+    "country": "GLOBAL",
+    "categoryIds": [
+      6,
+      13
+    ],
+    "difficulty": "easy",
+    "question": "Bức họa nổi tiếng \"Mona Lisa\" (Nàng La Gioconda) là tuyệt phẩm của danh họa nào thời Phục Hưng?",
+    "options": [
+      "Michelangelo",
+      "Leonardo da Vinci",
+      "Raphael",
+      "Vincent van Gogh"
+    ],
+    "correctIndex": 1,
+    "hint": "Thiên tài toàn năng người Ý, tác giả của bức tranh Bữa ăn tối cuối cùng (The Last Supper).",
+    "explanation": "Leonardo da Vinci đã vẽ bức chân dung Mona Lisa vào khoảng thế kỷ 16, hiện trưng bày tại bảo tàng Louvre."
+  },
+  {
+    "id": "q_16",
+    "country": "VN",
+    "categoryIds": [
+      5
+    ],
+    "difficulty": "medium",
+    "question": "Trong tác phẩm \"Chí Phèo\" của nhà văn Nam Cao, món ăn nào đã đánh thức tính người lương thiện trong Chí Phèo?",
+    "options": [
+      "Bát canh cua",
+      "Bát cháo hành",
+      "Chiếc bánh đúc",
+      "Bát cơm trắng"
+    ],
+    "correctIndex": 1,
+    "hint": "Bát cháo do Thị Nở nấu mang lại hơi ấm tình thương cho Chí.",
+    "explanation": "Bát cháo hành của Thị Nở là biểu tượng cho tình người và khát vọng hoàn lương của Chí Phèo."
+  },
+  {
+    "id": "q_17",
+    "country": "VN",
+    "categoryIds": [
+      11,
+      10
+    ],
+    "difficulty": "easy",
+    "question": "Món \"Phở bò\" và \"Bún chả\" là những nét văn hóa ẩm thực đặc trưng nổi tiếng nhất của vùng đất nào?",
+    "options": [
+      "Huế",
+      "Hà Nội",
+      "Sài Gòn",
+      "Đà Nẵng"
+    ],
+    "correctIndex": 1,
+    "hint": "Thủ đô ngàn năm văn hiến của Việt Nam.",
+    "explanation": "Phở Hà Nội và Bún chả Hà Nội là hai di sản ẩm thực danh tiếng thế giới của Thủ đô."
+  },
+  {
+    "id": "q_18",
+    "country": "GLOBAL",
+    "categoryIds": [
+      11,
+      10
+    ],
+    "difficulty": "medium",
+    "question": "Món ăn truyền thống \"Sushi\" và \"Sashimi\" có xuất xứ từ nền ẩm thực của quốc gia nào?",
+    "options": [
+      "Hàn Quốc",
+      "Nhật Bản",
+      "Trung Quốc",
+      "Thái Lan"
+    ],
+    "correctIndex": 1,
+    "hint": "Xứ sở hoa anh đào / Đất nước Mặt Trời mọc.",
+    "explanation": "Sushi là món ăn truyền thống trứ danh của Nhật Bản kết hợp cơm trộn giấm và hải sản tươi sống."
+  },
+  {
+    "id": "q_19",
+    "country": "GLOBAL",
+    "categoryIds": [
+      9
+    ],
+    "difficulty": "easy",
+    "question": "Thành ngữ tiếng Anh \"Piece of cake\" có ý nghĩa tương đương với câu nào trong tiếng Việt?",
+    "options": [
+      "Rất khó khăn",
+      "Dễ như ăn cháo",
+      "Một miếng bánh ngọt",
+      "Bất ngờ thú vị"
+    ],
+    "correctIndex": 1,
+    "hint": "Dùng để miêu tả một việc gì đó cực kỳ đơn giản và dễ dàng thực hiện.",
+    "explanation": "\"A piece of cake\" là thành ngữ chỉ một việc rất dễ làm, giống như câu \"dễ như trở bàn tay\" hay \"dễ như ăn cháo\"."
+  },
+  {
+    "id": "q_20",
+    "country": "GLOBAL",
+    "categoryIds": [
+      10,
+      2
+    ],
+    "difficulty": "hard",
+    "question": "Kim tự tháp Giza vĩ đại được xây dựng làm lăng mộ cho vị Pharaoh nào của Ai Cập cổ đại?",
+    "options": [
+      "Tutankhamun",
+      "Khufu (Cheops)",
+      "Ramses II",
+      "Cleopatra"
+    ],
+    "correctIndex": 1,
+    "hint": "Vị vua thuộc Vương triều thứ Tư của thời kỳ Cổ Vương quốc Ai Cập.",
+    "explanation": "Đại kim tự tháp Giza được xây dựng dưới triều đại của Pharaoh Khufu (Cheops) khoảng năm 2560 TCN."
+  },
+  {
+    "id": "q_21",
+    "country": "GLOBAL",
+    "categoryIds": [
+      14
+    ],
+    "difficulty": "easy",
+    "question": "Nếu hôm qua là ngày mai của thứ Hai, thì hôm nay là thứ mấy?",
+    "options": [
+      "Thứ Ba",
+      "Thứ Tư",
+      "Thứ Năm",
+      "Chủ Nhật"
+    ],
+    "correctIndex": 1,
+    "hint": "Ngày mai của thứ Hai là thứ Ba. Hôm qua là thứ Ba, vậy hôm nay là...?",
+    "explanation": "Ngày mai của thứ Hai là thứ Ba. Nếu hôm qua là thứ Ba, thì hôm nay phải là Thứ Tư."
+  },
+  {
+    "id": "q_22",
+    "country": "GLOBAL",
+    "categoryIds": [
+      14
+    ],
+    "difficulty": "medium",
+    "question": "Số nguyên tố chẵn DUY NHẤT trong toán học là số nào?",
+    "options": [
+      "0",
+      "2",
+      "4",
+      "6"
+    ],
+    "correctIndex": 1,
+    "hint": "Số nguyên tố nhỏ nhất và cũng là số chẵn duy nhất vì mọi số chẵn khác đều chia hết cho 2.",
+    "explanation": "Số 2 là số nguyên tố chẵn duy nhất trong tập hợp các số tự nhiên."
+  },
+  {
+    "id": "q_23",
+    "country": "GLOBAL",
+    "categoryIds": [
+      14
+    ],
+    "difficulty": "hard",
+    "question": "Điền số tiếp theo vào dãy số logic sau: 2, 3, 5, 8, 13, 21, ?",
+    "options": [
+      "28",
+      "34",
+      "35",
+      "38"
+    ],
+    "correctIndex": 1,
+    "hint": "Đây là dãy số Fibonacci nổi tiếng, mỗi số bằng tổng của 2 số liền trước.",
+    "explanation": "13 + 21 = 34. Đây là quy luật của dãy số Fibonacci."
+  },
+  {
+    "id": "q_24",
+    "country": "VN",
+    "categoryIds": [
+      15,
+      13
+    ],
+    "difficulty": "easy",
+    "question": "Nhạc sĩ nào là tác giả của bài Quốc ca nước Cộng hòa Xã hội Chủ nghĩa Việt Nam (Tiến quân ca)?",
+    "options": [
+      "Văn Cao",
+      "Trịnh Công Sơn",
+      "Phạm Tuyên",
+      "Hoàng Vân"
+    ],
+    "correctIndex": 0,
+    "hint": "Cố nhạc sĩ tài hoa sinh năm 1923, tác giả của các ca khúc Bến xuân, Trường ca Sông Lô.",
+    "explanation": "Nhạc sĩ Văn Cao sáng tác ca khúc \"Tiến quân ca\" vào cuối năm 1944."
+  },
+  {
+    "id": "q_25",
+    "country": "GLOBAL",
+    "categoryIds": [
+      15,
+      13
+    ],
+    "difficulty": "medium",
+    "question": "Nhà soạn nhạc thiên tài người Đức nào dù bị khiếm thính hoàn toàn vẫn sáng tác nên Bản giao hưởng số 9 (Ode to Joy)?",
+    "options": [
+      "Mozart",
+      "Beethoven",
+      "Bach",
+      "Chopin"
+    ],
+    "correctIndex": 1,
+    "hint": "Ludwig van...",
+    "explanation": "Ludwig van Beethoven (1770–1827) đã sáng tác nhiều kiệt tác bất hủ ngay cả khi mất thính giác hoàn toàn."
+  },
+  {
+    "id": "q_26",
+    "country": "GLOBAL",
+    "categoryIds": [
+      12,
+      4
+    ],
+    "difficulty": "easy",
+    "question": "Trụ sở chính của tổ chức Liên Hợp Quốc (United Nations) đặt tại thành phố nào?",
+    "options": [
+      "Geneva (Thụy Sĩ)",
+      "New York (Mỹ)",
+      "Paris (Pháp)",
+      "London (Anh)"
+    ],
+    "correctIndex": 1,
+    "hint": "Thành phố được mệnh danh là \"Quả táo lớn\" (Big Apple).",
+    "explanation": "Trụ sở chính của Liên Hợp Quốc nằm tại thành phố New York, Hoa Kỳ."
+  },
+  {
+    "id": "q_27",
+    "country": "GLOBAL",
+    "categoryIds": [
+      13,
+      3
+    ],
+    "difficulty": "medium",
+    "question": "Nhà khoa học nữ đầu tiên và duy nhất trong lịch sử giành 2 giải Nobel ở 2 lĩnh vực khoa học khác nhau (Vật lý và Hóa học) là ai?",
+    "options": [
+      "Rosalind Franklin",
+      "Marie Curie",
+      "Ada Lovelace",
+      "Dorothy Hodgkin"
+    ],
+    "correctIndex": 1,
+    "hint": "Nhà vật lý và hóa học người Pháp gốc Ba Lan nổi tiếng với các nghiên cứu về phóng xạ.",
+    "explanation": "Marie Curie giành giải Nobel Vật lý năm 1903 và Nobel Hóa học năm 1911."
+  },
+  {
+    "id": "q_28",
+    "country": "VN",
+    "categoryIds": [
+      2,
+      10
+    ],
+    "difficulty": "medium",
+    "question": "Hang động tự nhiên lớn nhất thế giới hiện nay nằm tại tỉnh Quảng Bình của Việt Nam có tên là gì?",
+    "options": [
+      "Hang Én",
+      "Động Phong Nha",
+      "Hang Sơn Đoòng",
+      "Động Thiên Đường"
+    ],
+    "correctIndex": 2,
+    "hint": "Được phát hiện lần đầu bởi ông Hồ Khanh năm 1991 và khảo sát năm 2009 bởi Hiệp hội Hang động Hoàng gia Anh.",
+    "explanation": "Hang Sơn Đoòng thuộc Vườn quốc gia Phong Nha - Kẻ Bàng là hang động tự nhiên lớn nhất thế giới."
+  },
+  {
+    "id": "q_29",
+    "country": "GLOBAL",
+    "categoryIds": [
+      8,
+      13
+    ],
+    "difficulty": "hard",
+    "question": "Cầu thủ bóng đá duy nhất trong lịch sử 3 lần nâng cao cúp vô địch thế giới FIFA World Cup với tư cách cầu thủ là ai?",
+    "options": [
+      "Maradona",
+      "Pelé",
+      "Zidane",
+      "Ronaldo Nazário"
+    ],
+    "correctIndex": 1,
+    "hint": "Huyền thoại \"Vua bóng đá\" người Brazil (vô địch các năm 1958, 1962, 1970).",
+    "explanation": "Edson Arantes do Nascimento (Pelé) là cầu thủ duy nhất 3 lần vô địch World Cup."
+  },
+  {
+    "id": "q_30",
+    "country": "GLOBAL",
+    "categoryIds": [
+      3,
+      4
+    ],
+    "difficulty": "medium",
+    "question": "Vận tốc ánh sáng truyền trong chân không xấp xỉ khoảng bao nhiêu km/s?",
+    "options": [
+      "30.000 km/s",
+      "300.000 km/s",
+      "3.000.000 km/s",
+      "150.000 km/s"
+    ],
+    "correctIndex": 1,
+    "hint": "Khoảng gần 300 ngàn kilômét trong 1 giây (chính xác là 299.792 km/s).",
+    "explanation": "Vận tốc ánh sáng trong chân không là c ≈ 299.792.458 m/s, tương đương xấp xỉ 300.000 km/s."
+  }
+];
