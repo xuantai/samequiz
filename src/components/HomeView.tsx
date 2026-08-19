@@ -46,7 +46,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             ĐỐI ĐẦU <span className="bg-gradient-to-r from-cyan-400 via-sky-300 to-fuchsia-400 bg-clip-text text-transparent">CÙNG MỘT BỘ ĐỀ</span>, THỬ THÁCH TỐC ĐỘ NÃO BỘ
           </h1>
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-            30 giây mỗi câu. Người nhanh hơn đúng nhận <strong className="text-cyan-400 font-black">+3 điểm</strong>, người sau đúng <strong className="text-slate-200">+1 điểm</strong>. Loại bỏ gian lận tìm kiếm bằng phản xạ tri thức đích thực!
+            20 giây mỗi câu. Người nhanh hơn đúng nhận <strong className="text-cyan-400 font-black">+3 điểm</strong>, người sau đúng <strong className="text-slate-200">+1 điểm</strong>. Loại bỏ gian lận tìm kiếm bằng phản xạ tri thức đích thực!
           </p>
 
           <div className="flex flex-wrap gap-4">

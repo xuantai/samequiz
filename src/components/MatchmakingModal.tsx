@@ -44,7 +44,7 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
       categoryIds: selectedCategories,
       lifelines,
       totalQuestions: 10,
-      timePerQuestion: 30
+      timePerQuestion: 20
     };
     onStartMatch(rules, roomPin.trim() || undefined, mode === 'ai' ? aiLevel : undefined);
   };

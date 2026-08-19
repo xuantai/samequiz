@@ -12,7 +12,7 @@ interface SplitScreenArenaProps {
 export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({ onExit }) => {
   const [questions] = useState<Question[]>(() => [...DEFAULT_QUESTIONS].sort(() => Math.random() - 0.5).slice(0, 10));
   const [currentRound, setCurrentRound] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(20);
 
   // Player 1 (Bottom)
   const [p1Selection, setP1Selection] = useState<number | null>(null);
@@ -39,7 +39,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({ onExit }) =>
       return;
     }
 
-    setTimeLeft(30);
+    setTimeLeft(20);
     setP1Selection(null);
     setP1Confirmed(false);
     setP1Time(null);
@@ -57,7 +57,7 @@ export const SplitScreenArena: React.FC<SplitScreenArenaProps> = ({ onExit }) =>
       setTimeLeft(prev => {
         if (prev <= 1) {
           clearInterval(timer);
-          resolveRound(p1Selection, p1Time || 30000, p2Selection, p2Time || 30000);
+          resolveRound(p1Selection, p1Time || 20000, p2Selection, p2Time || 20000);
           return 0;
         }
         if (prev <= 5) soundEngine.playUrgentTick();

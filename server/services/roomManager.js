@@ -24,7 +24,7 @@ export class RoomManager {
         addSelfTime: true
       },
       totalQuestions: 10,
-      timePerQuestion: 30
+      timePerQuestion: 20
     };
 
     const room = {

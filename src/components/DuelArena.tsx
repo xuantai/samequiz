@@ -27,8 +27,9 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   isOnline,
   onExit
 }) => {
+  const defaultTime = rules.timePerQuestion || 20;
   const [currentRound, setCurrentRound] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(rules.timePerQuestion || 30);
+  const [timeLeft, setTimeLeft] = useState(defaultTime);
   const [mySelectedOption, setMySelectedOption] = useState<number | null>(null);
   const [myConfirmed, setMyConfirmed] = useState(false);
   const [myConfirmTime, setMyConfirmTime] = useState<number | null>(null);
@@ -47,6 +48,16 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   // Round phase
   const [phase, setPhase] = useState<'question' | 'reveal' | 'finished'>('question');
   const [roundPointsEarned, setRoundPointsEarned] = useState<{ my: number; opponent: number }>({ my: 0, opponent: 0 });
+
+  // Refs to avoid any stale closures
+  const mySelectedOptionRef = useRef<number | null>(null);
+  const myConfirmedRef = useRef(false);
+  const myConfirmTimeRef = useRef<number | null>(null);
+  const opponentSelectedOptionRef = useRef<number | null>(null);
+  const opponentConfirmedRef = useRef(false);
+  const opponentConfirmTimeRef = useRef<number | null>(null);
+  const phaseRef = useRef<'question' | 'reveal' | 'finished'>('question');
+  const roundStartTimeRef = useRef(Date.now());
 
   // Lifelines
   const [lifelinesUsed, setLifelinesUsed] = useState({
@@ -72,8 +83,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   const [showResultModal, setShowResultModal] = useState(false);
 
   const currentQ = questions[currentRound] || questions[0];
-  const category = CATEGORIES.find(c => currentQ.categoryIds.includes(c.id)) || CATEGORIES[0];
-  const roundStartTimeRef = useRef(Date.now());
+  const category = CATEGORIES.find(c => currentQ?.categoryIds?.includes(c.id)) || CATEGORIES[0];
 
   // Reset question round
   useEffect(() => {
@@ -82,25 +92,35 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
       return;
     }
 
-    setTimeLeft(rules.timePerQuestion || 30);
+    const t = rules.timePerQuestion || 20;
+    setTimeLeft(t);
     setMySelectedOption(null);
+    mySelectedOptionRef.current = null;
     setMyConfirmed(false);
+    myConfirmedRef.current = false;
     setMyConfirmTime(null);
+    myConfirmTimeRef.current = null;
+
     setOpponentSelectedOption(null);
+    opponentSelectedOptionRef.current = null;
     setOpponentConfirmed(false);
+    opponentConfirmedRef.current = false;
     setOpponentConfirmTime(null);
+    opponentConfirmTimeRef.current = null;
+
     setHiddenOptions([]);
     setShowHintModal(false);
     setPhase('question');
+    phaseRef.current = 'question';
     roundStartTimeRef.current = Date.now();
 
     // AI Opponent simulation if not real online opponent
-    if (!isOnline) {
-      simulateAiOpponent(currentQ);
+    if (!isOnline && questions[currentRound]) {
+      simulateAiOpponent(questions[currentRound]);
     }
   }, [currentRound]);
 
-  // Main 30s Countdown Timer
+  // Main 20s Countdown Timer
   useEffect(() => {
     if (phase !== 'question') return;
 
@@ -112,7 +132,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           return 0;
         }
 
-        if (prev <= 6) {
+        if (prev <= 5) {
           soundEngine.playUrgentTick();
         } else {
           soundEngine.playTick();
@@ -143,21 +163,37 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   // Simulate AI Opponent Response Time and Accuracy
   const simulateAiOpponent = (q: Question) => {
     const isHard = q.difficulty === 'hard';
-    const accuracy = isHard ? 0.65 : 0.85;
+    const accuracy = isHard ? 0.70 : 0.90;
     const isCorrect = Math.random() < accuracy;
 
-    // AI takes between 2.5s and 12s to answer
-    const delaySec = Math.floor(Math.random() * 8) + 3;
+    // AI takes between 2s and 7s to answer
+    const delaySec = Math.floor(Math.random() * 6) + 2;
 
     setTimeout(() => {
-      if (phase !== 'question') return;
+      if (phaseRef.current !== 'question') return;
       const chosenOption = isCorrect
         ? q.correctIndex
         : [0, 1, 2, 3].filter(i => i !== q.correctIndex)[Math.floor(Math.random() * 3)];
 
+      const oppTime = delaySec * 1000;
       setOpponentSelectedOption(chosenOption);
+      opponentSelectedOptionRef.current = chosenOption;
       setOpponentConfirmed(true);
-      setOpponentConfirmTime(delaySec * 1000);
+      opponentConfirmedRef.current = true;
+      setOpponentConfirmTime(oppTime);
+      opponentConfirmTimeRef.current = oppTime;
+
+      // If user has ALREADY confirmed, resolve immediately!
+      if (myConfirmedRef.current) {
+        setTimeout(() => {
+          evaluateRound(
+            mySelectedOptionRef.current,
+            myConfirmTimeRef.current || 5000,
+            chosenOption,
+            oppTime
+          );
+        }, 300);
+      }
     }, delaySec * 1000);
   };
 
@@ -166,6 +202,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     if (myConfirmed || phase !== 'question' || hiddenOptions.includes(idx)) return;
     soundEngine.playSelect();
     setMySelectedOption(idx);
+    mySelectedOptionRef.current = idx;
   };
 
   // Confirm Option
@@ -173,12 +210,21 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     if (mySelectedOption === null || myConfirmed || phase !== 'question') return;
     soundEngine.playConfirm();
     setMyConfirmed(true);
+    myConfirmedRef.current = true;
     const elapsed = Date.now() - roundStartTimeRef.current;
     setMyConfirmTime(elapsed);
+    myConfirmTimeRef.current = elapsed;
 
     // If opponent already confirmed, resolve round right away
-    if (opponentConfirmed) {
-      setTimeout(() => evaluateRound(mySelectedOption, elapsed, opponentSelectedOption, opponentConfirmTime || 15000), 500);
+    if (opponentConfirmedRef.current) {
+      setTimeout(() => {
+        evaluateRound(
+          mySelectedOption,
+          elapsed,
+          opponentSelectedOptionRef.current,
+          opponentConfirmTimeRef.current || 8000
+        );
+      }, 300);
     }
   };
 
@@ -187,14 +233,22 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     if (phase !== 'question') return;
     soundEngine.playSelect();
     setMyConfirmed(false);
+    myConfirmedRef.current = false;
     setMyConfirmTime(null);
+    myConfirmTimeRef.current = null;
   };
 
-  // Handle Timeout (30s)
+  // Handle Timeout (20s)
   const handleTimeExpire = () => {
-    const finalMyOption = mySelectedOption;
-    const finalOpponentOption = opponentSelectedOption;
-    evaluateRound(finalMyOption, myConfirmTime || 30000, finalOpponentOption, opponentConfirmTime || 30000);
+    const finalMyOption = mySelectedOptionRef.current;
+    const finalOpponentOption = opponentSelectedOptionRef.current;
+    const totalTimeMs = (rules.timePerQuestion || 20) * 1000;
+    evaluateRound(
+      finalMyOption,
+      myConfirmTimeRef.current || totalTimeMs,
+      finalOpponentOption,
+      opponentConfirmTimeRef.current || totalTimeMs
+    );
   };
 
   // 3-1-0 Scoring Rule Resolution
@@ -204,16 +258,20 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     oppOpt: number | null,
     oppTime: number
   ) => {
-    if (phase !== 'question') return;
+    if (phaseRef.current !== 'question') return;
     setPhase('reveal');
+    phaseRef.current = 'reveal';
 
-    const isMyCorrect = myOpt === currentQ.correctIndex;
-    const isOppCorrect = oppOpt === currentQ.correctIndex;
+    const q = questions[currentRound];
+    if (!q) return;
+
+    const isMyCorrect = myOpt === q.correctIndex;
+    const isOppCorrect = oppOpt === q.correctIndex;
 
     let myPoints = 0;
     let oppPoints = 0;
 
-    // Accurate Scoring Rule
+    // Accurate 3-1-0 Scoring Rule
     if (isMyCorrect && isOppCorrect) {
       if (myTime <= oppTime) {
         myPoints = 3;
@@ -252,12 +310,12 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setRoundPointsEarned({ my: myPoints, opponent: oppPoints });
 
     // Track for profile radar
-    setMatchHistory(prev => [...prev, { categoryIds: currentQ.categoryIds, isCorrect: isMyCorrect }]);
+    setMatchHistory(prev => [...prev, { categoryIds: q.categoryIds, isCorrect: isMyCorrect }]);
 
-    // Move to next question after 4s reveal
+    // Move to next question after 3.5s reveal
     setTimeout(() => {
       setCurrentRound(prev => prev + 1);
-    }, 4500);
+    }, 3500);
   };
 
   // Match Finish
@@ -413,7 +471,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
                 }`}
                 strokeWidth="4"
                 strokeDasharray="175.9"
-                strokeDashoffset={175.9 - (175.9 * timeLeft) / 30}
+                strokeDashoffset={175.9 - (175.9 * timeLeft) / defaultTime}
                 strokeLinecap="round"
                 fill="transparent"
               />
