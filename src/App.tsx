@@ -11,20 +11,36 @@ import { LeaderboardView } from './components/LeaderboardView';
 import { ProfileView } from './components/ProfileView';
 import { MasterAdminView } from './components/admin/MasterAdminView';
 import { MatchmakingModal } from './components/MatchmakingModal';
+import { AuthModal } from './components/AuthModal';
 import { PlayerProfile, MatchRules } from './types/game';
 import { getProfile, updatePlayerProfile } from './services/storageService';
+import { authService, getAuthToken } from './services/authService';
 import { DEFAULT_QUESTIONS } from './data/defaultQuestions';
 
 type ViewMode = 'home' | 'practice' | 'duel' | 'split_screen' | 'tournament' | 'grand_event' | 'shop' | 'leaderboard' | 'profile' | 'master_admin';
 
 export function App() {
   const [profile, setProfile] = useState<PlayerProfile>(getProfile);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => !!getAuthToken());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [currentView, setCurrentView] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/master')) {
       return 'master_admin';
     }
     return 'home';
   });
+
+  // Check and restore logged in user from Postgres
+  useEffect(() => {
+    if (getAuthToken()) {
+      authService.fetchCurrentUser().then(user => {
+        if (user) {
+          setProfile(user);
+          setIsLoggedIn(true);
+        }
+      });
+    }
+  }, []);
 
   const [isSoundMuted, setIsSoundMuted] = useState(false);
   const [isMatchmakingOpen, setIsMatchmakingOpen] = useState(false);
@@ -97,6 +113,8 @@ export function App() {
   const handleUpdateProfile = (updated: PlayerProfile) => {
     const saved = updatePlayerProfile(updated);
     setProfile(saved);
+    // Sync to Supabase PostgreSQL
+    authService.syncProfile(saved);
   };
 
   const handleOpenMatchmaking = (mode: 'random' | 'friend' | 'ai') => {
@@ -126,6 +144,12 @@ export function App() {
     setCurrentView('duel');
   };
 
+  const handleLogout = () => {
+    authService.logout();
+    setIsLoggedIn(false);
+    setProfile(getProfile());
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
       {/* Dynamic Ambient Background Glows */}
@@ -143,6 +167,9 @@ export function App() {
           setActiveTab={(tab: string) => navigateTo(tab as ViewMode)}
           isMuted={isSoundMuted}
           onToggleMute={() => setIsSoundMuted(!isSoundMuted)}
+          isLoggedIn={isLoggedIn}
+          onOpenAuth={() => setIsAuthModalOpen(true)}
+          onLogout={handleLogout}
         />
       )}
 
@@ -241,6 +268,17 @@ export function App() {
         onClose={() => setIsMatchmakingOpen(false)}
         mode={matchmakingMode}
         onStartMatch={handleStartMatch}
+      />
+
+      {/* Authentication Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginSuccess={(userProfile) => {
+          setProfile(userProfile);
+          setIsLoggedIn(true);
+          setIsAuthModalOpen(false);
+        }}
       />
     </div>
   );

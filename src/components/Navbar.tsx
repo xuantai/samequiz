@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Shield, Coins, Trophy, ShoppingBag, User, Globe, Flame, LayoutDashboard } from 'lucide-react';
+import { Volume2, VolumeX, Shield, Coins, Trophy, ShoppingBag, User, Globe, Flame, LayoutDashboard, LogIn, LogOut } from 'lucide-react';
 import { PlayerProfile } from '../types/game';
 import { soundEngine } from '../services/soundEngine';
 
@@ -9,6 +9,9 @@ interface NavbarProps {
   setActiveTab: (tab: string) => void;
   isMuted: boolean;
   onToggleMute: () => void;
+  isLoggedIn?: boolean;
+  onOpenAuth?: () => void;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -16,7 +19,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   isMuted,
-  onToggleMute
+  onToggleMute,
+  isLoggedIn = false,
+  onOpenAuth,
+  onLogout
 }) => {
   return (
     <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-4 py-3 shadow-lg backdrop-blur-md">
@@ -105,28 +111,50 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4 text-cyan-400" />}
           </button>
 
-          {/* User Profile Button */}
-          <div
-            onClick={() => setActiveTab('profile')}
-            className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all group"
-          >
-            <div className={`w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-lg border-2 ${profile.avatarFrame || 'border-cyan-500'}`}>
-              {profile.avatar}
-            </div>
-            <div className="text-left">
-              <div className="flex items-center gap-1">
-                <span className={`text-xs font-bold truncate max-w-[90px] ${profile.titleColor || 'text-slate-100'}`}>
-                  {profile.username}
-                </span>
-                <span className="text-[10px] px-1 rounded bg-slate-800 text-slate-400 font-mono">
-                  {profile.country}
-                </span>
+          {/* User Profile / Auth Button */}
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <div
+                onClick={() => setActiveTab('profile')}
+                className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 cursor-pointer transition-all group"
+              >
+                <div className={`w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-lg border-2 ${profile.avatarFrame || 'border-cyan-500'}`}>
+                  {profile.avatar}
+                </div>
+                <div className="text-left hidden sm:block">
+                  <div className="flex items-center gap-1">
+                    <span className={`text-xs font-bold truncate max-w-[90px] ${profile.titleColor || 'text-slate-100'}`}>
+                      {profile.username}
+                    </span>
+                    <span className="text-[10px] px-1 rounded bg-slate-800 text-slate-400 font-mono">
+                      {profile.country}
+                    </span>
+                  </div>
+                  <div className="text-[10px] font-mono text-cyan-400 font-semibold">
+                    ELO {profile.elo}
+                  </div>
+                </div>
               </div>
-              <div className="text-[10px] font-mono text-cyan-400 font-semibold">
-                ELO {profile.elo}
-              </div>
+
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-rose-400 hover:border-rose-500/30 transition-colors cursor-pointer"
+                  title="Đăng xuất tài khoản"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
             </div>
-          </div>
+          ) : (
+            <button
+              onClick={onOpenAuth}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/20 hover:scale-105 transition-all flex items-center gap-1.5 cursor-pointer"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>ĐĂNG NHẬP</span>
+            </button>
+          )}
 
           {/* Master Admin Portal link */}
           <button
