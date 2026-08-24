@@ -497,6 +497,43 @@ io.on('connection', (socket) => {
   console.log('Player connected:', socket.id, profile?.username);
 
   // 1v1 Room events
+  socket.on('find_match', ({ rules, playerProfile }) => {
+    const p = playerProfile || profile;
+    if (!p) return;
+
+    const queue = roomManager.matchmakingQueue;
+    const existingIndex = queue.findIndex(q => q.profile?.id === p.id);
+    if (existingIndex !== -1) queue.splice(existingIndex, 1);
+
+    if (queue.length > 0) {
+      const opponentEntry = queue.shift();
+      const room = roomManager.createRoom(opponentEntry.profile, rules);
+      roomManager.joinRoom(room.id, p);
+
+      opponentEntry.socket.join(room.id);
+      socket.join(room.id);
+
+      io.to(room.id).emit('match_found', {
+        roomId: room.id,
+        players: [opponentEntry.profile, p],
+        opponent: opponentEntry.profile.id === p.id ? opponentEntry.profile : (opponentEntry.profile.id === p.id ? p : opponentEntry.profile),
+        rules: room.rules
+      });
+      console.log('⚡ [MATCHMAKING] Đã ghép thành công 2 người chơi thật:', opponentEntry.profile.username, 'vs', p.username);
+    } else {
+      queue.push({ socket, profile: p, rules });
+      socket.emit('match_searching');
+      console.log('🔍 [MATCHMAKING] Người chơi vào hàng đợi tìm trận:', p.username);
+    }
+  });
+
+  socket.on('cancel_match', ({ playerId }) => {
+    const queue = roomManager.matchmakingQueue;
+    const idx = queue.findIndex(q => q.profile?.id === playerId || q.socket.id === socket.id);
+    if (idx !== -1) queue.splice(idx, 1);
+    socket.emit('match_cancelled');
+  });
+
   socket.on('create_room', ({ rules }) => {
     const room = roomManager.createRoom(profile, rules);
     socket.join(room.id);

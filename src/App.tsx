@@ -46,36 +46,18 @@ export function App() {
   const [isMatchmakingOpen, setIsMatchmakingOpen] = useState(false);
   const [matchmakingMode, setMatchmakingMode] = useState<'random' | 'friend' | 'ai'>('random');
 
-  // Match state
+  // Match state (Mặc định AI Bot Luyện Tập - Không giả mạo người thật)
   const [opponent, setOpponent] = useState<PlayerProfile>({
-    id: 'opp_bot_1',
-    username: 'Quang Thần Đồng',
-    avatar: '🧠',
+    id: 'bot_ai_training',
+    username: 'AI Bot Luyện Tập',
+    avatar: '🤖',
     country: 'VN',
-    coins: 4500,
-    elo: 1450,
-    offlineElo: 1450,
+    coins: 1000,
+    elo: 1200,
+    offlineElo: 1200,
     inventory: [],
-    statsOnline: {
-      totalQuestions: 150,
-      correctQuestions: 120,
-      categoryStats: {},
-      onlineWins: 32,
-      onlineLosses: 10,
-      offlineWins: 0,
-      offlineLosses: 0,
-      highestStreak: 8
-    },
-    statsOffline: {
-      totalQuestions: 0,
-      correctQuestions: 0,
-      categoryStats: {},
-      onlineWins: 0,
-      onlineLosses: 0,
-      offlineWins: 0,
-      offlineLosses: 0,
-      highestStreak: 0
-    }
+    statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
+    statsOffline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 }
   });
 
   const [activeRules, setActiveRules] = useState<MatchRules>({
@@ -122,18 +104,33 @@ export function App() {
     setIsMatchmakingOpen(true);
   };
 
-  const handleStartMatch = (rules: MatchRules, _roomPin?: string, aiLevel?: 'easy' | 'medium' | 'hard') => {
+  const handleStartMatch = (rules: MatchRules, _roomPin?: string, aiLevel?: 'easy' | 'medium' | 'hard', matchedOpponent?: PlayerProfile) => {
     setIsMatchmakingOpen(false);
     setActiveRules(rules);
 
-    if (matchmakingMode === 'ai') {
+    if (matchedOpponent) {
+      setOpponent(matchedOpponent);
+    } else if (matchmakingMode === 'ai' || aiLevel) {
       setOpponent({
-        id: 'bot_' + Date.now(),
-        username: aiLevel === 'hard' ? 'AI Thần Đồng (Hard)' : aiLevel === 'easy' ? 'AI Tập Sự (Easy)' : 'AI Cao Thủ (Medium)',
+        id: 'bot_ai_' + Date.now(),
+        username: aiLevel === 'hard' ? 'AI Bot Thần Đồng (Hard)' : aiLevel === 'easy' ? 'AI Bot Tập Sự (Easy)' : 'AI Bot Cao Thủ (Medium)',
         avatar: '🤖',
         country: 'VN',
         coins: 1000,
         elo: aiLevel === 'hard' ? 1800 : aiLevel === 'easy' ? 900 : 1350,
+        offlineElo: 1200,
+        inventory: [],
+        statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
+        statsOffline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 }
+      });
+    } else {
+      setOpponent({
+        id: 'bot_ai_training',
+        username: 'AI Bot Luyện Tập',
+        avatar: '🤖',
+        country: 'VN',
+        coins: 1000,
+        elo: 1200,
         offlineElo: 1200,
         inventory: [],
         statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
@@ -281,6 +278,7 @@ export function App() {
         isOpen={isMatchmakingOpen}
         onClose={() => setIsMatchmakingOpen(false)}
         mode={matchmakingMode}
+        profile={profile}
         onStartMatch={handleStartMatch}
       />
 
