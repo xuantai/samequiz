@@ -59,7 +59,11 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
       console.log('🎉 MATCH FOUND VIA SOCKET (REAL PLAYERS):', data);
       setIsSearching(false);
       const opponent = data.players.find(p => p.id !== profile.id) || data.players[0];
-      onStartMatch(data.rules || getActiveRules(), data.roomId, opponent);
+      const matchRules: MatchRules = {
+        ...(data.rules || getActiveRules()),
+        roomId: data.roomId
+      };
+      onStartMatch(matchRules, data.roomId, opponent);
     };
 
     socket.on('match_found', handleMatchFound);

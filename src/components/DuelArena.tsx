@@ -8,6 +8,7 @@ import { Question, PlayerProfile, LifelineState, MatchRules } from '../types/gam
 import { CATEGORIES } from '../data/categories';
 import { soundEngine } from '../services/soundEngine';
 import { recordMatchResult, submitQuestionReport } from '../services/storageService';
+import { getSocket } from '../services/socketService';
 import { ResultModal } from './ResultModal';
 
 interface DuelArenaProps {
@@ -85,6 +86,71 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   const currentQ = questions[currentRound] || questions[0];
   const category = CATEGORIES.find(c => currentQ?.categoryIds?.includes(c.id)) || CATEGORIES[0];
 
+  // Socket.IO Realtime Answer Syncing
+  useEffect(() => {
+    if (!rules.roomId) return;
+    const socket = getSocket();
+
+    const handleSelectionUpdate = (data: {
+      playerId: string;
+      hasSelected: boolean;
+      optionIndex?: number | null;
+      confirmed: boolean;
+      timeMs?: number;
+    }) => {
+      if (data.playerId !== myProfile.id) {
+        setOpponentSelectedOption(data.hasSelected ? (data.optionIndex ?? 0) : null);
+        opponentSelectedOptionRef.current = data.hasSelected ? (data.optionIndex ?? 0) : null;
+        setOpponentConfirmed(data.confirmed);
+        opponentConfirmedRef.current = data.confirmed;
+
+        if (data.confirmed) {
+          const oppTime = data.timeMs || (Date.now() - roundStartTimeRef.current);
+          setOpponentConfirmTime(oppTime);
+          opponentConfirmTimeRef.current = oppTime;
+
+          // If user already confirmed on this device, resolve round right away!
+          if (myConfirmedRef.current) {
+            setTimeout(() => {
+              evaluateRound(
+                mySelectedOptionRef.current,
+                myConfirmTimeRef.current || 5000,
+                opponentSelectedOptionRef.current,
+                oppTime
+              );
+            }, 300);
+          }
+        }
+      }
+    };
+
+    const handleSabotageTime = (data: { targetPlayerId: string; seconds: number }) => {
+      if (data.targetPlayerId === myProfile.id) {
+        setTimeLeft(prev => Math.max(1, prev - data.seconds));
+        setSabotageAlert('⚡ Bạn bị đối thủ trừ 10s!');
+        setTimeout(() => setSabotageAlert(null), 2500);
+      }
+    };
+
+    const handleExtraTime = (data: { targetPlayerId: string; seconds: number }) => {
+      if (data.targetPlayerId === myProfile.id) {
+        setTimeLeft(prev => prev + data.seconds);
+        setSabotageAlert('⏰ Bạn được cộng thêm +10s thời gian!');
+        setTimeout(() => setSabotageAlert(null), 2500);
+      }
+    };
+
+    socket.on('player_selection_updated', handleSelectionUpdate);
+    socket.on('sabotage_time_event', handleSabotageTime);
+    socket.on('extra_time_event', handleExtraTime);
+
+    return () => {
+      socket.off('player_selection_updated', handleSelectionUpdate);
+      socket.off('sabotage_time_event', handleSabotageTime);
+      socket.off('extra_time_event', handleExtraTime);
+    };
+  }, [rules.roomId, myProfile.id, currentRound]);
+
   // Reset question round
   useEffect(() => {
     if (currentRound >= questions.length) {
@@ -146,6 +212,15 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     soundEngine.playSelect();
     setMySelectedOption(idx);
     mySelectedOptionRef.current = idx;
+
+    if (rules.roomId) {
+      getSocket().emit('submit_answer', {
+        roomId: rules.roomId,
+        playerId: myProfile.id,
+        optionIndex: idx,
+        confirmed: false
+      });
+    }
   };
 
   // Confirm Option
@@ -157,6 +232,16 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     const elapsed = Date.now() - roundStartTimeRef.current;
     setMyConfirmTime(elapsed);
     myConfirmTimeRef.current = elapsed;
+
+    if (rules.roomId) {
+      getSocket().emit('submit_answer', {
+        roomId: rules.roomId,
+        playerId: myProfile.id,
+        optionIndex: mySelectedOption,
+        confirmed: true,
+        timeMs: elapsed
+      });
+    }
 
     // If opponent already confirmed, resolve round right away
     if (opponentConfirmedRef.current) {
@@ -179,6 +264,15 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     myConfirmedRef.current = false;
     setMyConfirmTime(null);
     myConfirmTimeRef.current = null;
+
+    if (rules.roomId) {
+      getSocket().emit('submit_answer', {
+        roomId: rules.roomId,
+        playerId: myProfile.id,
+        optionIndex: mySelectedOption,
+        confirmed: false
+      });
+    }
   };
 
   // Handle Timeout (20s)
@@ -307,6 +401,13 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setLifelinesUsed({ ...lifelinesUsed, reduceOpponentTime: true });
     setSabotageAlert('⚡ Bạn đã trừ 10s suy nghĩ của đối thủ!');
     setTimeout(() => setSabotageAlert(null), 2500);
+
+    if (rules.roomId) {
+      getSocket().emit('use_lifeline', {
+        roomId: rules.roomId,
+        lifelineType: 'reduceOpponentTime'
+      });
+    }
   };
 
   const useAddSelfTime = () => {
@@ -316,6 +417,13 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setTimeLeft(prev => prev + 10);
     setSabotageAlert('⏰ Bạn được cộng thêm +10s thời gian!');
     setTimeout(() => setSabotageAlert(null), 2500);
+
+    if (rules.roomId) {
+      getSocket().emit('use_lifeline', {
+        roomId: rules.roomId,
+        lifelineType: 'addSelfTime'
+      });
+    }
   };
 
   return (

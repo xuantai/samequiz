@@ -134,7 +134,7 @@ export class RoomManager {
     }, (room.rules.timePerQuestion || 30) * 1000 + 500); // 30s + grace period
   }
 
-  submitAnswer(roomId, playerId, optionIndex, confirmed) {
+  submitAnswer(roomId, playerId, optionIndex, confirmed, clientTimeMs) {
     const room = this.rooms.get(roomId);
     if (!room || room.status !== 'in_progress') return;
 
@@ -148,13 +148,14 @@ export class RoomManager {
       this.io.to(roomId).emit('player_selection_updated', {
         playerId,
         hasSelected: true,
+        optionIndex,
         confirmed: false
       });
       return;
     }
 
     const now = Date.now();
-    const timeMs = now - room.questionStartTime;
+    const timeMs = clientTimeMs || (now - room.questionStartTime);
 
     room.answers[qIndex][playerId] = {
       playerId,
@@ -166,14 +167,16 @@ export class RoomManager {
     this.io.to(roomId).emit('player_selection_updated', {
       playerId,
       hasSelected: optionIndex !== null,
-      confirmed: !!confirmed
+      optionIndex,
+      confirmed: !!confirmed,
+      timeMs
     });
 
     // Check if both players confirmed
-    const p1 = room.players[0].id;
-    const p2 = room.players[1].id;
-    const ans1 = room.answers[qIndex][p1];
-    const ans2 = room.answers[qIndex][p2];
+    const p1 = room.players[0]?.id;
+    const p2 = room.players[1]?.id;
+    const ans1 = room.answers[qIndex]?.[p1];
+    const ans2 = room.answers[qIndex]?.[p2];
 
     if (ans1 && ans1.confirmed && ans2 && ans2.confirmed) {
       // Both confirmed early, resolve question immediately!

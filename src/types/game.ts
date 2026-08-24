@@ -66,6 +66,7 @@ export interface LifelineState {
 }
 
 export interface MatchRules {
+  roomId?: string;
   difficulty: Difficulty;
   categoryIds: number[];
   lifelines: {

@@ -554,8 +554,11 @@ io.on('connection', (socket) => {
     roomManager.startMatch(roomId);
   });
 
-  socket.on('submit_answer', ({ roomId, optionIndex, confirmed }) => {
-    roomManager.submitAnswer(roomId, profile.id, optionIndex, confirmed);
+  socket.on('submit_answer', ({ roomId, optionIndex, confirmed, timeMs, playerId }) => {
+    const pId = playerId || profile?.id;
+    if (pId) {
+      roomManager.submitAnswer(roomId, pId, optionIndex, confirmed, timeMs);
+    }
   });
 
   socket.on('use_lifeline', ({ roomId, lifelineType }) => {
