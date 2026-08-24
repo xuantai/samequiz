@@ -30,6 +30,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 }) => {
   const defaultTime = rules.timePerQuestion || 20;
   const [currentRound, setCurrentRound] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState<Question>(questions[0]);
   const [timeLeft, setTimeLeft] = useState(defaultTime);
   const [mySelectedOption, setMySelectedOption] = useState<number | null>(null);
   const [myConfirmed, setMyConfirmed] = useState(false);
@@ -97,13 +98,52 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
   const [matchResult, setMatchResult] = useState<{ eloDelta: number; coinReward: number } | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
 
-  const currentQ = questions[currentRound] || questions[0];
+  const currentQ = currentQuestion || questions[currentRound] || questions[0];
   const category = CATEGORIES.find(c => currentQ?.categoryIds?.includes(c.id)) || CATEGORIES[0];
 
-  // Socket.IO Realtime Answer Syncing
+  // Socket.IO Realtime Answer & Authoritative Question/Result Syncing
   useEffect(() => {
     if (!rules.roomId) return;
     const socket = getSocket();
+
+    const handleNewQuestion = (data: {
+      roundIndex: number;
+      totalRounds: number;
+      question: Question;
+      timeLimitSeconds: number;
+      scores: Record<string, number>;
+    }) => {
+      console.log('⚡ [SOCKET] Nhận câu hỏi mới từ máy chủ:', data);
+      setCurrentRound(data.roundIndex);
+      setCurrentQuestion(data.question);
+      setTimeLeft(data.timeLimitSeconds || 20);
+
+      // Reset selection state
+      setMySelectedOption(null);
+      mySelectedOptionRef.current = null;
+      setMyConfirmed(false);
+      myConfirmedRef.current = false;
+      setMyConfirmTime(null);
+      myConfirmTimeRef.current = null;
+
+      setOpponentSelectedOption(null);
+      opponentSelectedOptionRef.current = null;
+      setOpponentConfirmed(false);
+      opponentConfirmedRef.current = false;
+      setOpponentConfirmTime(null);
+      opponentConfirmTimeRef.current = null;
+
+      setHiddenOptions([]);
+      setShowHintModal(false);
+      setPhase('question');
+      phaseRef.current = 'question';
+      roundStartTimeRef.current = Date.now();
+
+      if (data.scores) {
+        setMyScore(data.scores[myProfile.id] || 0);
+        setOpponentScore(data.scores[opponentProfile.id] || 0);
+      }
+    };
 
     const handleSelectionUpdate = (data: {
       playerId: string;
@@ -122,20 +162,90 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
           const oppTime = data.timeMs || (Date.now() - roundStartTimeRef.current);
           setOpponentConfirmTime(oppTime);
           opponentConfirmTimeRef.current = oppTime;
-
-          // If user already confirmed on this device, resolve round right away!
-          if (myConfirmedRef.current) {
-            setTimeout(() => {
-              evaluateRound(
-                mySelectedOptionRef.current,
-                myConfirmTimeRef.current || 5000,
-                opponentSelectedOptionRef.current,
-                oppTime
-              );
-            }, 300);
-          }
         }
       }
+    };
+
+    const handleRoundResult = (data: {
+      roundIndex: number;
+      correctIndex: number;
+      explanation?: string;
+      roundPoints: Record<string, number>;
+      totalScores: Record<string, number>;
+      playerAnswers: Record<string, { option: number | null; timeMs: number; isCorrect: boolean; points: number }>;
+    }) => {
+      console.log('🎉 [SOCKET] Nhận kết quả câu hỏi từ máy chủ:', data);
+      setPhase('reveal');
+      phaseRef.current = 'reveal';
+
+      const myAns = data.playerAnswers?.[myProfile.id] || { option: mySelectedOptionRef.current, timeMs: myConfirmTimeRef.current || 20000, isCorrect: false, points: 0 };
+      const oppAns = data.playerAnswers?.[opponentProfile.id] || { option: opponentSelectedOptionRef.current, timeMs: opponentConfirmTimeRef.current || 20000, isCorrect: false, points: 0 };
+
+      const myPts = data.roundPoints?.[myProfile.id] ?? myAns.points ?? 0;
+      const oppPts = data.roundPoints?.[opponentProfile.id] ?? oppAns.points ?? 0;
+
+      // Authoritative score update from server
+      if (data.totalScores) {
+        setMyScore(data.totalScores[myProfile.id] ?? 0);
+        setOpponentScore(data.totalScores[opponentProfile.id] ?? 0);
+      } else {
+        setMyScore(prev => prev + myPts);
+        setOpponentScore(prev => prev + oppPts);
+      }
+
+      if (myAns.isCorrect) {
+        soundEngine.playCorrect();
+        setMyStreak(prev => prev + 1);
+      } else {
+        soundEngine.playWrong();
+        setMyStreak(0);
+      }
+
+      if (oppAns.isCorrect) {
+        setOpponentStreak(prev => prev + 1);
+      } else {
+        setOpponentStreak(0);
+      }
+
+      const mySec = Math.max(0.1, Number((myAns.timeMs / 1000).toFixed(2)));
+      const oppSec = Math.max(0.1, Number((oppAns.timeMs / 1000).toFixed(2)));
+
+      setRoundResultDetails({
+        myPoints: myPts,
+        oppPoints: oppPts,
+        myTimeSec: mySec,
+        oppTimeSec: oppSec,
+        isMyCorrect: myAns.isCorrect,
+        isOppCorrect: oppAns.isCorrect
+      });
+
+      if (data.explanation) {
+        setCurrentQuestion(prev => ({
+          ...prev,
+          explanation: data.explanation,
+          correctIndex: data.correctIndex
+        }));
+      }
+    };
+
+    const handleMatchFinished = (data: {
+      scores: Record<string, number>;
+      winnerId: string | null;
+      isDraw: boolean;
+    }) => {
+      console.log('🏁 [SOCKET] Trận đấu kết thúc:', data);
+      setPhase('finished');
+      phaseRef.current = 'finished';
+
+      if (data.scores) {
+        setMyScore(data.scores[myProfile.id] || 0);
+        setOpponentScore(data.scores[opponentProfile.id] || 0);
+      }
+
+      const isWin = data.winnerId === myProfile.id;
+      const res = recordMatchResult(isOnline, isWin, matchHistory, opponentProfile.elo);
+      setMatchResult(res);
+      setShowResultModal(true);
     };
 
     const handleSabotageTime = (data: { targetPlayerId: string; seconds: number }) => {
@@ -154,19 +264,27 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
       }
     };
 
+    socket.on('new_question', handleNewQuestion);
     socket.on('player_selection_updated', handleSelectionUpdate);
+    socket.on('round_result', handleRoundResult);
+    socket.on('match_finished', handleMatchFinished);
     socket.on('sabotage_time_event', handleSabotageTime);
     socket.on('extra_time_event', handleExtraTime);
 
     return () => {
+      socket.off('new_question', handleNewQuestion);
       socket.off('player_selection_updated', handleSelectionUpdate);
+      socket.off('round_result', handleRoundResult);
+      socket.off('match_finished', handleMatchFinished);
       socket.off('sabotage_time_event', handleSabotageTime);
       socket.off('extra_time_event', handleExtraTime);
     };
-  }, [rules.roomId, myProfile.id, currentRound]);
+  }, [rules.roomId, myProfile.id, opponentProfile.id]);
 
-  // Reset question round
+  // Fallback Reset for offline/practice mode
   useEffect(() => {
+    if (rules.roomId) return; // Managed authoritatively by server
+
     if (currentRound >= questions.length) {
       handleMatchEnd();
       return;
@@ -193,7 +311,7 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setPhase('question');
     phaseRef.current = 'question';
     roundStartTimeRef.current = Date.now();
-  }, [currentRound]);
+  }, [currentRound, rules.roomId]);
 
   // Main 20s Countdown Timer
   useEffect(() => {

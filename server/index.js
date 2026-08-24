@@ -510,9 +510,6 @@ io.on('connection', (socket) => {
       const room = roomManager.createRoom(opponentEntry.profile, rules);
       roomManager.joinRoom(room.id, p);
 
-      room.status = 'in_progress';
-      room.questionStartTime = Date.now();
-
       opponentEntry.socket.join(room.id);
       socket.join(room.id);
 
@@ -523,6 +520,10 @@ io.on('connection', (socket) => {
         rules: { ...room.rules, roomId: room.id }
       });
       console.log('⚡ [MATCHMAKING] Đã ghép thành công 2 người chơi thật:', opponentEntry.profile.username, 'vs', p.username, 'Phòng:', room.id);
+
+      setTimeout(() => {
+        roomManager.startMatch(room.id);
+      }, 500);
     } else {
       queue.push({ socket, profile: p, rules });
       socket.emit('match_searching');
@@ -550,6 +551,12 @@ io.on('connection', (socket) => {
     } else {
       socket.join(roomId);
       io.to(roomId).emit('player_joined', { room: result.room, joinedPlayer: profile });
+
+      if (result.room && result.room.players.length >= 2) {
+        setTimeout(() => {
+          roomManager.startMatch(roomId);
+        }, 500);
+      }
     }
   });
 
