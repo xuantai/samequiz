@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Search, Sparkles, Key, Play, ShieldAlert, Cpu, Settings2, Loader2, Radio, Bot, Users } from 'lucide-react';
+import { X, Search, Sparkles, Key, Play, Settings2, Radio, Users } from 'lucide-react';
 import { MatchRules, Difficulty, PlayerProfile } from '../types/game';
 import { CATEGORIES } from '../data/categories';
 import { getSocket } from '../services/socketService';
@@ -7,9 +7,9 @@ import { getSocket } from '../services/socketService';
 interface MatchmakingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'random' | 'friend' | 'ai';
+  mode: 'random' | 'friend';
   profile: PlayerProfile;
-  onStartMatch: (rules: MatchRules, roomPin?: string, aiLevel?: 'easy' | 'medium' | 'hard', matchedOpponent?: PlayerProfile) => void;
+  onStartMatch: (rules: MatchRules, roomPin?: string, matchedOpponent?: PlayerProfile) => void;
 }
 
 export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
@@ -22,7 +22,6 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
   const [difficulty, setDifficulty] = useState<Difficulty>('random');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const [roomPin, setRoomPin] = useState('');
-  const [aiLevel, setAiLevel] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [lifelines, setLifelines] = useState({
     fiftyFifty: true,
     hint: true,
@@ -57,10 +56,10 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
     const socket = getSocket();
 
     const handleMatchFound = (data: { roomId: string; players: PlayerProfile[]; rules: MatchRules }) => {
-      console.log('🎉 MATCH FOUND VIA SOCKET:', data);
+      console.log('🎉 MATCH FOUND VIA SOCKET (REAL PLAYERS):', data);
       setIsSearching(false);
       const opponent = data.players.find(p => p.id !== profile.id) || data.players[0];
-      onStartMatch(data.rules || getActiveRules(), data.roomId, undefined, opponent);
+      onStartMatch(data.rules || getActiveRules(), data.roomId, opponent);
     };
 
     socket.on('match_found', handleMatchFound);
@@ -91,23 +90,6 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
   const handleStart = () => {
     const rules = getActiveRules();
 
-    if (mode === 'ai') {
-      const aiOpponent: PlayerProfile = {
-        id: 'bot_ai_' + aiLevel,
-        username: aiLevel === 'hard' ? 'AI Bot Thần Đồng (Hard)' : aiLevel === 'easy' ? 'AI Bot Tập Sự (Easy)' : 'AI Bot Cao Thủ (Medium)',
-        avatar: '🤖',
-        country: 'VN',
-        coins: 1000,
-        elo: aiLevel === 'hard' ? 1800 : aiLevel === 'easy' ? 900 : 1350,
-        offlineElo: 1200,
-        inventory: [],
-        statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
-        statsOffline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 }
-      };
-      onStartMatch(rules, undefined, aiLevel, aiOpponent);
-      return;
-    }
-
     if (mode === 'random') {
       setIsSearching(true);
       const socket = getSocket();
@@ -124,24 +106,6 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
     setIsSearching(false);
     const socket = getSocket();
     socket.emit('cancel_match', { playerId: profile.id });
-  };
-
-  const handlePlayAiFallback = () => {
-    handleCancelSearch();
-    const rules = getActiveRules();
-    const aiOpponent: PlayerProfile = {
-      id: 'bot_ai_' + aiLevel,
-      username: aiLevel === 'hard' ? 'AI Bot Thần Đồng (Hard)' : aiLevel === 'easy' ? 'AI Bot Tập Sự (Easy)' : 'AI Bot Cao Thủ (Medium)',
-      avatar: '🤖',
-      country: 'VN',
-      coins: 1000,
-      elo: aiLevel === 'hard' ? 1800 : aiLevel === 'easy' ? 900 : 1350,
-      offlineElo: 1200,
-      inventory: [],
-      statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
-      statsOffline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 }
-    };
-    onStartMatch(rules, undefined, aiLevel, aiOpponent);
   };
 
   return (
@@ -174,44 +138,38 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
             <div>
               <div className="flex items-center justify-center gap-2 text-cyan-300 font-bold text-xs uppercase tracking-wider">
                 <Radio className="w-4 h-4 text-cyan-400 animate-spin" />
-                <span>Đang quét tìm đối thủ trực tuyến ({searchSeconds}s)...</span>
+                <span>Đang quét tìm đối thủ người thật ({searchSeconds}s)...</span>
               </div>
               <h3 className="text-xl font-black text-white mt-1">ĐANG TÌM NGƯỜI CHƠI THẬT</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                Hệ thống đang ghép cặp bạn với người chơi khác cùng thời gian thực qua máy chủ...
+                Hệ thống đang kết nối trực tiếp với người chơi trực tuyến trên máy chủ...
               </p>
             </div>
 
-            {searchSeconds >= 5 && (
-              <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-left space-y-3 animate-fade-in">
+            {searchSeconds >= 6 && (
+              <div className="p-4 rounded-2xl bg-cyan-950/40 border border-cyan-500/40 text-left space-y-3 animate-fade-in">
                 <div className="flex items-start gap-2">
-                  <Bot className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <Users className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
                   <div className="text-xs">
-                    <strong className="text-amber-300 block">Chưa có người chơi nào bấm tìm trận cùng lúc</strong>
+                    <strong className="text-cyan-300 block">Đang chờ đối thủ trực tuyến bấm ghép trận</strong>
                     <span className="text-slate-300 text-[11px]">
-                      Bạn có thể chuyển sang đấu với <strong>AI Bot Luyện Tập</strong> (nhãn 🤖 rõ ràng) hoặc tiếp tục chờ người chơi thật vào phòng.
+                      Bạn có thể tiếp tục chờ hoặc tạo phòng PIN để gửi mã mời bạn bè vào đấu ngay lập tức!
                     </span>
                   </div>
                 </div>
 
                 <div className="flex gap-2 pt-1">
                   <button
-                    onClick={handlePlayAiFallback}
-                    className="flex-1 py-2 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 font-black text-xs hover:scale-[1.02] transition-transform cursor-pointer flex items-center justify-center gap-1.5"
-                  >
-                    <Bot className="w-4 h-4" /> Đấu Với AI Bot ({aiLevel})
-                  </button>
-                  <button
                     onClick={handleCancelSearch}
-                    className="py-2 px-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold hover:text-rose-400 cursor-pointer"
+                    className="flex-1 py-2 px-3 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs hover:bg-slate-700 hover:text-white transition-all cursor-pointer text-center"
                   >
-                    Hủy
+                    Dừng Tìm Kiếm
                   </button>
                 </div>
               </div>
             )}
 
-            {searchSeconds < 5 && (
+            {searchSeconds < 6 && (
               <button
                 onClick={handleCancelSearch}
                 className="px-6 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white text-xs font-bold cursor-pointer"
@@ -227,12 +185,10 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
               <h3 className="text-2xl font-black text-slate-100 flex items-center justify-center gap-2">
                 {mode === 'random' && <><Search className="w-6 h-6 text-cyan-400" /> Ghép Trận Ngẫu Nhiên (Người Thật)</>}
                 {mode === 'friend' && <><Key className="w-6 h-6 text-fuchsia-400" /> Phòng Đấu Bạn Bè 1v1</>}
-                {mode === 'ai' && <><Cpu className="w-6 h-6 text-emerald-400" /> Đấu Với AI Bot Luyện Tập</>}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 {mode === 'random' && 'Hệ thống quét và ghép nối 1v1 trực tiếp với người chơi thật trực tuyến'}
                 {mode === 'friend' && 'Nhập mã PIN hoặc tự tạo phòng để cùng bạn bè so tài'}
-                {mode === 'ai' && 'Đấu phản xạ với AI Bot (dán nhãn 🤖 rõ ràng, phân cấp độ)'}
               </p>
             </div>
 
@@ -248,43 +204,6 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
                   onChange={e => setRoomPin(e.target.value)}
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-cyan-300 font-mono focus:outline-none focus:border-cyan-400"
                 />
-              </div>
-            )}
-
-            {(mode === 'ai' || mode === 'random') && (
-              <div className="mb-4">
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                  Cấp Độ AI Dự Phòng
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setAiLevel('easy')}
-                    className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      aiLevel === 'easy' ? 'bg-emerald-500 text-slate-950 border-emerald-400 font-black' : 'bg-slate-900 text-slate-300 border-slate-800'
-                    }`}
-                  >
-                    🌱 AI Tập Sự
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAiLevel('medium')}
-                    className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      aiLevel === 'medium' ? 'bg-amber-500 text-slate-950 border-amber-400 font-black' : 'bg-slate-900 text-slate-300 border-slate-800'
-                    }`}
-                  >
-                    ⚔️ AI Cao Thủ
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAiLevel('hard')}
-                    className={`py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      aiLevel === 'hard' ? 'bg-red-500 text-slate-950 border-red-400 font-black' : 'bg-slate-900 text-slate-300 border-slate-800'
-                    }`}
-                  >
-                    🔥 AI Thần Đồng
-                  </button>
-                </div>
               </div>
             )}
 
@@ -408,7 +327,7 @@ export const MatchmakingModal: React.FC<MatchmakingModalProps> = ({
               className="w-full py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 text-slate-950 font-black text-base shadow-xl shadow-cyan-500/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 cursor-pointer"
             >
               <Play className="w-5 h-5 fill-current" />
-              {mode === 'random' ? 'TÌM ĐỐI THỦ THẬT NGAY' : mode === 'friend' ? (roomPin ? 'VÀO PHÒNG' : 'TẠO PHÒNG MỚI') : 'BẮT ĐẦU ĐẤU AI BOT'}
+              {mode === 'random' ? 'TÌM ĐỐI THỦ THẬT NGAY' : (roomPin ? 'VÀO PHÒNG' : 'TẠO PHÒNG MỚI')}
             </button>
           </div>
         )}

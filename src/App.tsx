@@ -44,15 +44,15 @@ export function App() {
 
   const [isSoundMuted, setIsSoundMuted] = useState(false);
   const [isMatchmakingOpen, setIsMatchmakingOpen] = useState(false);
-  const [matchmakingMode, setMatchmakingMode] = useState<'random' | 'friend' | 'ai'>('random');
+  const [matchmakingMode, setMatchmakingMode] = useState<'random' | 'friend'>('random');
 
-  // Match state (Mặc định AI Bot Luyện Tập - Không giả mạo người thật)
+  // Match state (Người chơi đối thủ)
   const [opponent, setOpponent] = useState<PlayerProfile>({
-    id: 'bot_ai_training',
-    username: 'AI Bot Luyện Tập',
-    avatar: '🤖',
+    id: 'opp_player',
+    username: 'Đối Thủ 1v1',
+    avatar: '⚡',
     country: 'VN',
-    coins: 1000,
+    coins: 1200,
     elo: 1200,
     offlineElo: 1200,
     inventory: [],
@@ -99,37 +99,24 @@ export function App() {
     authService.syncProfile(saved);
   };
 
-  const handleOpenMatchmaking = (mode: 'random' | 'friend' | 'ai') => {
+  const handleOpenMatchmaking = (mode: 'random' | 'friend') => {
     setMatchmakingMode(mode);
     setIsMatchmakingOpen(true);
   };
 
-  const handleStartMatch = (rules: MatchRules, _roomPin?: string, aiLevel?: 'easy' | 'medium' | 'hard', matchedOpponent?: PlayerProfile) => {
+  const handleStartMatch = (rules: MatchRules, _roomPin?: string, matchedOpponent?: PlayerProfile) => {
     setIsMatchmakingOpen(false);
     setActiveRules(rules);
 
     if (matchedOpponent) {
       setOpponent(matchedOpponent);
-    } else if (matchmakingMode === 'ai' || aiLevel) {
-      setOpponent({
-        id: 'bot_ai_' + Date.now(),
-        username: aiLevel === 'hard' ? 'AI Bot Thần Đồng (Hard)' : aiLevel === 'easy' ? 'AI Bot Tập Sự (Easy)' : 'AI Bot Cao Thủ (Medium)',
-        avatar: '🤖',
-        country: 'VN',
-        coins: 1000,
-        elo: aiLevel === 'hard' ? 1800 : aiLevel === 'easy' ? 900 : 1350,
-        offlineElo: 1200,
-        inventory: [],
-        statsOnline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 },
-        statsOffline: { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 }
-      });
     } else {
       setOpponent({
-        id: 'bot_ai_training',
-        username: 'AI Bot Luyện Tập',
-        avatar: '🤖',
+        id: 'opp_player_' + Date.now(),
+        username: 'Đối Thủ 1v1',
+        avatar: '⚡',
         country: 'VN',
-        coins: 1000,
+        coins: 1200,
         elo: 1200,
         offlineElo: 1200,
         inventory: [],
@@ -214,7 +201,7 @@ export function App() {
             opponentProfile={opponent}
             questions={DEFAULT_QUESTIONS}
             rules={activeRules}
-            isOnline={matchmakingMode !== 'ai'}
+            isOnline={true}
             onExit={() => navigateTo('home')}
           />
         )}

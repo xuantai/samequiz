@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Swords, Bot, Users, Trophy, Crown, Sparkles, Flame, Shield, ArrowRight, Zap, Target, Award, Play } from 'lucide-react';
+import { Swords, Users, Trophy, Crown, Sparkles, Flame, Shield, ArrowRight, Zap, Target, Award, Play } from 'lucide-react';
 import { PlayerProfile, UserStats, MatchRules } from '../types/game';
 import { getCategoryProficiencies } from '../services/storageService';
 import { MatchmakingModal } from './MatchmakingModal';
 
 interface HomeViewProps {
   profile: PlayerProfile;
-  onOpenMatchmaking: (mode: 'random' | 'friend' | 'ai') => void;
+  onOpenMatchmaking: (mode: 'random' | 'friend') => void;
   onOpenPractice: () => void;
   onOpenSplitScreen: () => void;
   onOpenTournament: () => void;
@@ -123,22 +123,22 @@ export const HomeView: React.FC<HomeViewProps> = ({
             </div>
           </div>
 
-          {/* Mode 2: Bot AI Battle */}
+          {/* Mode 2: Friend PIN Battle */}
           <div
-            onClick={() => onOpenMatchmaking('ai')}
-            className="group glass-panel rounded-2xl p-5 border border-emerald-500/20 hover:border-emerald-400 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/10 transition-all duration-300 relative overflow-hidden"
+            onClick={() => onOpenMatchmaking('friend')}
+            className="group glass-panel rounded-2xl p-5 border border-fuchsia-500/20 hover:border-fuchsia-400 cursor-pointer hover:shadow-xl hover:shadow-fuchsia-500/10 transition-all duration-300 relative overflow-hidden"
           >
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3 group-hover:scale-110 transition-transform">
-              <Bot className="w-6 h-6" />
+            <div className="w-11 h-11 rounded-xl bg-fuchsia-500/10 border border-fuchsia-500/30 flex items-center justify-center text-fuchsia-400 mb-3 group-hover:scale-110 transition-transform">
+              <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1 group-hover:text-emerald-300 transition-colors">
-              Đấu Với AI
+            <h3 className="text-base font-bold text-white mb-1 group-hover:text-fuchsia-300 transition-colors">
+              Đấu Bạn Bè 1v1
             </h3>
             <p className="text-xs text-slate-400 mb-3">
-              3 cấp độ Tập sự, Cao thủ, Thần đồng. Luyện phản xạ tức thì không chờ mạng.
+              Tạo phòng hoặc nhập mã PIN để so tài đối kháng trực tiếp với bạn bè.
             </p>
-            <div className="flex items-center text-xs font-bold text-emerald-400 gap-1 group-hover:translate-x-1 transition-transform">
-              Thách đấu AI <ArrowRight className="w-4 h-4" />
+            <div className="flex items-center text-xs font-bold text-fuchsia-400 gap-1 group-hover:translate-x-1 transition-transform">
+              Vào phòng đấu <ArrowRight className="w-4 h-4" />
             </div>
           </div>
 

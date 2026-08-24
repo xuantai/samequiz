@@ -113,11 +113,6 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     setPhase('question');
     phaseRef.current = 'question';
     roundStartTimeRef.current = Date.now();
-
-    // AI Opponent simulation if not real online opponent
-    if (!isOnline && questions[currentRound]) {
-      simulateAiOpponent(questions[currentRound]);
-    }
   }, [currentRound]);
 
   // Main 20s Countdown Timer
@@ -144,58 +139,6 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 
     return () => clearInterval(timer);
   }, [phase, currentRound]);
-
-  // Voice activity simulator for immersion
-  useEffect(() => {
-    if (myMicMuted) {
-      setMySpeaking(false);
-      return;
-    }
-    const interval = setInterval(() => {
-      setMySpeaking(Math.random() > 0.6);
-      if (!opponentDeafened) {
-        setOpponentSpeaking(Math.random() > 0.5);
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [myMicMuted, opponentDeafened]);
-
-  // Simulate AI Opponent Response Time and Accuracy
-  const simulateAiOpponent = (q: Question) => {
-    const isHard = q.difficulty === 'hard';
-    const accuracy = isHard ? 0.70 : 0.90;
-    const isCorrect = Math.random() < accuracy;
-
-    // AI takes between 2s and 7s to answer
-    const delaySec = Math.floor(Math.random() * 6) + 2;
-
-    setTimeout(() => {
-      if (phaseRef.current !== 'question') return;
-      const chosenOption = isCorrect
-        ? q.correctIndex
-        : [0, 1, 2, 3].filter(i => i !== q.correctIndex)[Math.floor(Math.random() * 3)];
-
-      const oppTime = delaySec * 1000;
-      setOpponentSelectedOption(chosenOption);
-      opponentSelectedOptionRef.current = chosenOption;
-      setOpponentConfirmed(true);
-      opponentConfirmedRef.current = true;
-      setOpponentConfirmTime(oppTime);
-      opponentConfirmTimeRef.current = oppTime;
-
-      // If user has ALREADY confirmed, resolve immediately!
-      if (myConfirmedRef.current) {
-        setTimeout(() => {
-          evaluateRound(
-            mySelectedOptionRef.current,
-            myConfirmTimeRef.current || 5000,
-            chosenOption,
-            oppTime
-          );
-        }, 300);
-      }
-    }, delaySec * 1000);
-  };
 
   // Option selection
   const handleSelectOption = (idx: number) => {

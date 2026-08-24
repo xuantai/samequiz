@@ -80,7 +80,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({ profile }) => 
               activeTab === 'offline' ? 'bg-cyan-500 text-slate-950 font-black' : 'bg-slate-900 text-slate-300 border border-slate-800'
             }`}
           >
-            🧘 Xếp Hạng Luyện Tập & AI
+            🧘 Xếp Hạng Luyện Tập Solo
           </button>
         </div>
       </div>
