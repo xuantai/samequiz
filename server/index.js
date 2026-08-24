@@ -142,6 +142,30 @@ async function initPostgres() {
       CREATE INDEX IF NOT EXISTS idx_users_username ON public.users (username);
       CREATE INDEX IF NOT EXISTS idx_reports_status ON public.question_reports (status);
     `);
+
+    // Seed Master Admin if not exists
+    const adminCheck = await client.query("SELECT id FROM public.users WHERE username = 'admin' OR role = 'admin'");
+    if (adminCheck.rows.length === 0) {
+      const salt = await bcrypt.genSalt(10);
+      const adminPassHash = await bcrypt.hash('Admin@123456', salt);
+      await client.query(
+        `INSERT INTO public.users (id, username, password_hash, avatar, role, elo, offline_elo, coins, country, inventory)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+        [
+          'usr_admin_master',
+          'admin',
+          adminPassHash,
+          '⚡',
+          'admin',
+          2500,
+          2500,
+          999999,
+          'VN',
+          JSON.stringify(['item_frame_neon', 'item_frame_gold'])
+        ]
+      );
+      console.log('👑 [POSTGRESQL] Đã khởi tạo tài khoản Master Admin (username: admin / pass: Admin@123456)');
+    }
     
     console.log('✅ [POSTGRESQL] Toàn bộ Schema bảng Supabase đã khởi tạo thành công!');
     client.release();
@@ -154,20 +178,12 @@ async function initPostgres() {
 
 initPostgres();
 
-// In-Memory Data state for Admin CMS & In-Memory fallback users
+// Realtime dynamic state for Admin CMS & questions
 let categories = [...categoriesData];
 let questions = [...questionsData];
 let shopItems = [...shopItemsData];
 let events = [...eventsData];
 let reports = [];
-let users = [
-  { id: 'usr_admin', username: 'Administrator (Master)', avatar: '⚡', role: 'admin', elo: 2500, coins: 999999, country: 'VN', isBanned: false },
-  { id: 'usr_1', username: 'Quang Thần Đồng', avatar: '🧠', role: 'player', elo: 1850, coins: 5400, country: 'VN', isBanned: false },
-  { id: 'usr_2', username: 'Hương Bách Khoa', avatar: '🌸', role: 'player', elo: 1690, coins: 3200, country: 'VN', isBanned: false },
-  { id: 'usr_3', username: 'Alexander (UK)', avatar: '🦁', role: 'player', elo: 1580, coins: 2100, country: 'UK', isBanned: false }
-];
-
-const fallbackAuthStore = new Map(); // username -> { id, username, passwordHash, ...profile }
 
 // Helper format user profile
 function formatUserProfile(row) {
@@ -177,9 +193,9 @@ function formatUserProfile(row) {
     avatar: row.avatar || '🧠',
     avatarFrame: row.avatar_frame || 'border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]',
     country: row.country || 'VN',
-    coins: row.coins || 1200,
-    elo: row.elo || 1200,
-    offlineElo: row.offline_elo || 1200,
+    coins: row.coins !== undefined ? row.coins : 1200,
+    elo: row.elo !== undefined ? row.elo : 1200,
+    offlineElo: row.offline_elo !== undefined ? row.offline_elo : 1200,
     role: row.role || 'player',
     isBanned: !!row.is_banned,
     inventory: typeof row.inventory === 'string' ? JSON.parse(row.inventory) : (row.inventory || ['item_frame_neon']),
@@ -209,13 +225,13 @@ app.post('/api/auth/register', async (req, res) => {
 
     if (isPostgresReady) {
       // Check existing username in Postgres
-      const checkRes = await dbPool.query('SELECT id FROM users WHERE LOWER(username) = $1', [cleanUsername]);
+      const checkRes = await dbPool.query('SELECT id FROM public.users WHERE LOWER(username) = $1', [cleanUsername]);
       if (checkRes.rows.length > 0) {
         return res.status(400).json({ error: 'Tên đăng nhập này đã được sử dụng!' });
       }
 
       const insertRes = await dbPool.query(
-        `INSERT INTO users (id, username, password_hash, avatar, country, coins, elo, offline_elo, role, inventory, stats_online, stats_offline)
+        `INSERT INTO public.users (id, username, password_hash, avatar, country, coins, elo, offline_elo, role, inventory, stats_online, stats_offline)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
          RETURNING *`,
         [userId, username.trim(), passwordHash, avatar, country, 1200, 1200, 1200, 'player', JSON.stringify(['item_frame_neon']), JSON.stringify(defaultStats), JSON.stringify(defaultStats)]
@@ -224,44 +240,15 @@ app.post('/api/auth/register', async (req, res) => {
       const userProfile = formatUserProfile(insertRes.rows[0]);
       const token = jwt.sign({ id: userProfile.id, username: userProfile.username, role: userProfile.role }, JWT_SECRET, { expiresIn: '30d' });
 
-      // Also add to Admin CMS list
-      users.unshift(userProfile);
-
       return res.json({ success: true, message: 'Đăng ký tài khoản thành công!', token, user: userProfile });
     } else {
-      // Fallback in-memory
-      if (fallbackAuthStore.has(cleanUsername)) {
-        return res.status(400).json({ error: 'Tên đăng nhập này đã được sử dụng!' });
-      }
-
-      const userProfile = {
-        id: userId,
-        username: username.trim(),
-        avatar,
-        avatarFrame: 'border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]',
-        country,
-        coins: 1200,
-        elo: 1200,
-        offlineElo: 1200,
-        role: 'player',
-        isBanned: false,
-        inventory: ['item_frame_neon'],
-        statsOnline: defaultStats,
-        statsOffline: defaultStats
-      };
-
-      fallbackAuthStore.set(cleanUsername, { ...userProfile, passwordHash });
-      users.unshift(userProfile);
-
-      const token = jwt.sign({ id: userProfile.id, username: userProfile.username, role: userProfile.role }, JWT_SECRET, { expiresIn: '30d' });
-      return res.json({ success: true, message: 'Đăng ký tài khoản thành công!', token, user: userProfile });
+      return res.status(500).json({ error: 'Cơ sở dữ liệu đang khởi động, vui lòng thử lại sau vài giây.' });
     }
   } catch (err) {
     console.error('Lỗi API register:', err);
     res.status(500).json({ error: 'Lỗi máy chủ khi đăng ký. Vui lòng thử lại sau.' });
   }
 });
-
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -273,7 +260,7 @@ app.post('/api/auth/login', async (req, res) => {
     const cleanUsername = username.trim().toLowerCase();
 
     if (isPostgresReady) {
-      const result = await dbPool.query('SELECT * FROM users WHERE LOWER(username) = $1', [cleanUsername]);
+      const result = await dbPool.query('SELECT * FROM public.users WHERE LOWER(username) = $1', [cleanUsername]);
       if (result.rows.length === 0) {
         return res.status(400).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
       }
@@ -293,21 +280,7 @@ app.post('/api/auth/login', async (req, res) => {
 
       return res.json({ success: true, message: 'Đăng nhập thành công!', token, user: userProfile });
     } else {
-      // Fallback
-      const record = fallbackAuthStore.get(cleanUsername);
-      if (!record) {
-        return res.status(400).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
-      }
-
-      const isMatch = await bcrypt.compare(password, record.passwordHash);
-      if (!isMatch) {
-        return res.status(400).json({ error: 'Tên đăng nhập hoặc mật khẩu không chính xác.' });
-      }
-
-      const { passwordHash, ...userProfile } = record;
-      const token = jwt.sign({ id: userProfile.id, username: userProfile.username, role: userProfile.role }, JWT_SECRET, { expiresIn: '30d' });
-
-      return res.json({ success: true, message: 'Đăng nhập thành công!', token, user: userProfile });
+      return res.status(500).json({ error: 'Cơ sở dữ liệu đang kết nối, vui lòng thử lại sau.' });
     }
   } catch (err) {
     console.error('Lỗi API login:', err);
@@ -326,19 +299,13 @@ app.get('/api/auth/me', async (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     if (isPostgresReady) {
-      const result = await dbPool.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
+      const result = await dbPool.query('SELECT * FROM public.users WHERE id = $1', [decoded.id]);
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Không tìm thấy người dùng.' });
       }
       return res.json({ success: true, user: formatUserProfile(result.rows[0]) });
     } else {
-      const cleanUsername = decoded.username.toLowerCase();
-      const record = fallbackAuthStore.get(cleanUsername);
-      if (!record) {
-        return res.status(404).json({ error: 'Không tìm thấy người dùng.' });
-      }
-      const { passwordHash, ...userProfile } = record;
-      return res.json({ success: true, user: userProfile });
+      return res.status(500).json({ error: 'Cơ sở dữ liệu chưa sẵn sàng.' });
     }
   } catch (err) {
     res.status(401).json({ error: 'Phiên đăng nhập đã hết hạn.' });
@@ -354,7 +321,7 @@ app.post('/api/auth/sync', async (req, res) => {
 
     if (isPostgresReady) {
       await dbPool.query(
-        `UPDATE users
+        `UPDATE public.users
          SET avatar = $1, avatar_frame = $2, country = $3, coins = $4, elo = $5, offline_elo = $6,
              inventory = $7, stats_online = $8, stats_offline = $9, updated_at = NOW()
          WHERE id = $10`,
@@ -371,12 +338,6 @@ app.post('/api/auth/sync', async (req, res) => {
           profile.id
         ]
       );
-    } else {
-      const cleanUsername = (profile.username || '').toLowerCase();
-      const record = fallbackAuthStore.get(cleanUsername);
-      if (record) {
-        fallbackAuthStore.set(cleanUsername, { ...record, ...profile });
-      }
     }
 
     res.json({ success: true });
@@ -386,6 +347,45 @@ app.post('/api/auth/sync', async (req, res) => {
   }
 });
 
+// === LEADERBOARD API (REAL DATA FROM SUPABASE) ===
+app.get('/api/leaderboard', async (req, res) => {
+  try {
+    const type = req.query.type || 'online';
+    if (isPostgresReady) {
+      const query = type === 'online'
+        ? 'SELECT id, username, avatar, avatar_frame, country, coins, elo, offline_elo, stats_online, stats_offline FROM public.users WHERE is_banned = FALSE ORDER BY elo DESC, coins DESC LIMIT 100'
+        : 'SELECT id, username, avatar, avatar_frame, country, coins, elo, offline_elo, stats_online, stats_offline FROM public.users WHERE is_banned = FALSE ORDER BY offline_elo DESC, coins DESC LIMIT 100';
+
+      const result = await dbPool.query(query);
+      const leaderboard = result.rows.map((row, idx) => {
+        const stats = type === 'online'
+          ? (typeof row.stats_online === 'string' ? JSON.parse(row.stats_online) : (row.stats_online || {}))
+          : (typeof row.stats_offline === 'string' ? JSON.parse(row.stats_offline) : (row.stats_offline || {}));
+
+        return {
+          rank: idx + 1,
+          id: row.id,
+          name: row.username,
+          avatar: row.avatar || '🧠',
+          avatarFrame: row.avatar_frame,
+          country: row.country || 'VN',
+          coins: row.coins || 1200,
+          elo: type === 'online' ? (row.elo || 1200) : (row.offline_elo || 1200),
+          wins: stats.onlineWins || stats.wins || 0,
+          losses: stats.onlineLosses || stats.losses || 0,
+          matches: stats.totalQuestions || stats.totalMatches || 0,
+          highestStreak: stats.highestStreak || 0
+        };
+      });
+
+      return res.json({ success: true, leaderboard });
+    }
+    res.json({ success: true, leaderboard: [] });
+  } catch (err) {
+    console.error('Lỗi API leaderboard:', err);
+    res.status(500).json({ error: 'Lỗi máy chủ khi lấy bảng xếp hạng.' });
+  }
+});
 
 const roomManager = new RoomManager(io);
 const tournamentManager = new TournamentManager(io);
@@ -422,11 +422,33 @@ app.post('/api/admin/events', (req, res) => {
   res.json({ success: true, event: newEvt });
 });
 
-app.get('/api/admin/users', (req, res) => res.json(users));
-app.post('/api/admin/users/:id/toggle-ban', (req, res) => {
-  const u = users.find(user => user.id === req.params.id);
-  if (u) u.isBanned = !u.isBanned;
-  res.json({ success: true, user: u });
+app.get('/api/admin/users', async (req, res) => {
+  try {
+    if (isPostgresReady) {
+      const result = await dbPool.query('SELECT * FROM public.users ORDER BY created_at DESC');
+      const realUsers = result.rows.map(formatUserProfile);
+      return res.json(realUsers);
+    }
+    res.json([]);
+  } catch (err) {
+    console.error('Lỗi admin users:', err);
+    res.status(500).json({ error: 'Lỗi tải danh sách người dùng.' });
+  }
+});
+
+app.post('/api/admin/users/:id/toggle-ban', async (req, res) => {
+  try {
+    if (isPostgresReady) {
+      const result = await dbPool.query('UPDATE public.users SET is_banned = NOT is_banned, updated_at = NOW() WHERE id = $1 RETURNING *', [req.params.id]);
+      if (result.rows.length > 0) {
+        return res.json({ success: true, user: formatUserProfile(result.rows[0]) });
+      }
+    }
+    res.status(404).json({ error: 'Không tìm thấy người dùng.' });
+  } catch (err) {
+    console.error('Lỗi toggle-ban:', err);
+    res.status(500).json({ error: 'Lỗi cập nhật trạng thái người dùng.' });
+  }
 });
 
 app.get('/api/admin/reports', (req, res) => res.json(reports));
@@ -444,14 +466,29 @@ app.post('/api/admin/reports/:id/resolve', (req, res) => {
   res.json({ success: true, report: rep });
 });
 
-app.get('/api/admin/stats', (req, res) => {
-  res.json({
-    totalUsers: users.length + 128,
-    totalQuestions: questions.length,
-    activeMatches: roomManager.rooms.size,
-    totalEvents: events.length,
-    pendingReports: reports.filter(r => r.status === 'pending').length
-  });
+app.get('/api/admin/stats', async (req, res) => {
+  try {
+    let totalUsers = 0;
+    let totalQ = questions.length;
+    let totalRep = 0;
+    if (isPostgresReady) {
+      const userCountRes = await dbPool.query('SELECT COUNT(*) FROM public.users');
+      totalUsers = parseInt(userCountRes.rows[0].count, 10);
+      const qCountRes = await dbPool.query('SELECT COUNT(*) FROM public.questions');
+      totalQ = parseInt(qCountRes.rows[0].count, 10) || questions.length;
+      const repCountRes = await dbPool.query("SELECT COUNT(*) FROM public.question_reports WHERE status = 'pending'");
+      totalRep = parseInt(repCountRes.rows[0].count, 10);
+    }
+    res.json({
+      totalUsers,
+      totalQuestions: totalQ,
+      activeMatches: roomManager.rooms.size,
+      totalEvents: events.length,
+      pendingReports: totalRep
+    });
+  } catch (err) {
+    res.json({ totalUsers: 0, totalQuestions: questions.length, activeMatches: 0, totalEvents: events.length, pendingReports: 0 });
+  }
 });
 
 // === REALTIME SOCKET.IO HANDLERS ===

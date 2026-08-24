@@ -173,6 +173,20 @@ export function App() {
         />
       )}
 
+      {/* Guest Notice Banner */}
+      {!isLoggedIn && currentView !== 'split_screen' && currentView !== 'duel' && currentView !== 'practice' && currentView !== 'master_admin' && (
+        <div className="bg-gradient-to-r from-cyan-950/90 via-slate-900/95 to-fuchsia-950/90 border-b border-cyan-500/30 px-4 py-2.5 text-center text-xs flex items-center justify-center gap-2 shadow-inner">
+          <span className="text-cyan-300 font-bold">⚡ Bạn đang ở chế độ Khách.</span>
+          <button
+            onClick={() => setIsAuthModalOpen(true)}
+            className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 text-slate-950 font-black text-[11px] hover:scale-105 transition-transform cursor-pointer shadow-md shadow-cyan-500/20"
+          >
+            Đăng Ký / Đăng Nhập Ngay
+          </button>
+          <span className="text-slate-400 hidden sm:inline">để bảo toàn Rank ELO, Coins và sở hữu Skins vĩnh viễn trên Supabase!</span>
+        </div>
+      )}
+
       {/* Main Content Area */}
       <main className="flex-1 w-full">
         {currentView === 'home' && (

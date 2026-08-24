@@ -43,13 +43,45 @@ export const MasterAdminView: React.FC = () => {
     }
   ]);
 
-  const defaultStats = { totalQuestions: 0, correctQuestions: 0, categoryStats: {}, onlineWins: 0, onlineLosses: 0, offlineWins: 0, offlineLosses: 0, highestStreak: 0 };
+  const [users, setUsers] = useState<PlayerProfile[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalQuestions: 0,
+    activeMatches: 0,
+    totalEvents: 0,
+    pendingReports: 0
+  });
 
-  const [users, setUsers] = useState<PlayerProfile[]>([
-    { id: 'usr_admin', username: 'Administrator (Master)', avatar: '⚡', role: 'admin', elo: 2500, offlineElo: 2500, coins: 999999, country: 'VN', isBanned: false, inventory: [], statsOnline: { ...defaultStats, onlineWins: 95 }, statsOffline: defaultStats },
-    { id: 'usr_1', username: 'Quang Thần Đồng', avatar: '🧠', role: 'player', elo: 1850, offlineElo: 1850, coins: 5400, country: 'VN', isBanned: false, inventory: [], statsOnline: { ...defaultStats, onlineWins: 40 }, statsOffline: defaultStats },
-    { id: 'usr_2', username: 'Hương Bách Khoa', avatar: '🌸', role: 'player', elo: 1690, offlineElo: 1690, coins: 3200, country: 'VN', isBanned: false, inventory: [], statsOnline: { ...defaultStats, onlineWins: 22 }, statsOffline: defaultStats }
-  ]);
+  const fetchAdminData = () => {
+    fetch('/api/admin/users')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setUsers(data);
+      })
+      .catch(err => console.error('Lỗi tải users:', err));
+
+    fetch('/api/admin/stats')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setStats(data);
+      })
+      .catch(err => console.error('Lỗi tải stats:', err));
+  };
+
+  React.useEffect(() => {
+    fetchAdminData();
+  }, []);
+
+  const handleToggleBan = (userId: string) => {
+    fetch(`/api/admin/users/${userId}/toggle-ban`, { method: 'POST' })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          setUsers(users.map(u => u.id === userId ? { ...u, isBanned: data.user.isBanned } : u));
+        }
+      })
+      .catch(err => console.error('Lỗi toggle ban:', err));
+  };
 
   // Form State
   const [newQText, setNewQText] = useState('');
@@ -145,18 +177,18 @@ export const MasterAdminView: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-slate-400 uppercase">Tổng Thành Viên</div>
-              <div className="text-3xl font-black text-white font-mono">{users.length + 128}</div>
-              <span className="text-[11px] text-emerald-400 font-bold">+18 hôm nay</span>
+              <div className="text-xs font-bold text-slate-400 uppercase">Tổng Thành Viên Thật</div>
+              <div className="text-3xl font-black text-white font-mono">{stats.totalUsers || users.length}</div>
+              <span className="text-[11px] text-emerald-400 font-bold">Supabase Database</span>
             </div>
             <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-2">
               <div className="text-xs font-bold text-slate-400 uppercase">Ngân Hàng Câu Hỏi</div>
-              <div className="text-3xl font-black text-cyan-400 font-mono">{questions.length}</div>
+              <div className="text-3xl font-black text-cyan-400 font-mono">{stats.totalQuestions || questions.length}</div>
               <span className="text-[11px] text-cyan-300 font-bold">15 Lĩnh vực chuẩn</span>
             </div>
             <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-2">
               <div className="text-xs font-bold text-slate-400 uppercase">Báo Cáo Chờ Duyệt</div>
-              <div className="text-3xl font-black text-amber-400 font-mono">{reports.filter(r => r.status === 'pending').length}</div>
+              <div className="text-3xl font-black text-amber-400 font-mono">{stats.pendingReports || reports.filter(r => r.status === 'pending').length}</div>
               <span className="text-[11px] text-amber-300 font-bold">Thợ săn lỗi tri thức</span>
             </div>
             <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-2">
@@ -326,28 +358,39 @@ export const MasterAdminView: React.FC = () => {
         <div className="glass-panel rounded-3xl p-6 border border-slate-800 space-y-6">
           <h3 className="text-base font-black text-white">Quản Lý Người Dùng & Cấm Tài Khoản</h3>
           <div className="space-y-2">
-            {users.map(u => (
-              <div key={u.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{u.avatar}</span>
-                  <div>
-                    <div className="text-xs font-black text-slate-100">{u.username}</div>
-                    <div className="text-[10px] text-cyan-400 font-mono">ELO {u.elo} • {u.coins} Coins</div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setUsers(users.map(item => item.id === u.id ? { ...item, isBanned: !item.isBanned } : item));
-                  }}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer ${
-                    u.isBanned ? 'bg-rose-500 text-white' : 'bg-slate-800 text-slate-300 hover:text-white'
-                  }`}
-                >
-                  {u.isBanned ? 'ĐÃ KHÓA (MỞ)' : 'KHÓA TÀI KHOẢN'}
-                </button>
+            {users.length === 0 ? (
+              <div className="p-8 text-center text-slate-400 bg-slate-900/50 rounded-2xl border border-slate-800">
+                Chưa có thành viên nào đăng ký tài khoản trên hệ thống Supabase.
               </div>
-            ))}
+            ) : (
+              users.map(u => (
+                <div key={u.id} className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{u.avatar}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-black text-slate-100">{u.username}</span>
+                        {u.role === 'admin' && (
+                          <span className="px-1.5 py-0.5 rounded bg-fuchsia-500/20 text-fuchsia-300 text-[9px] font-black uppercase">
+                            ADMIN
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[10px] text-cyan-400 font-mono">ELO {u.elo} • {u.coins.toLocaleString()} Coins • {u.country}</div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleToggleBan(u.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      u.isBanned ? 'bg-rose-500 text-white hover:bg-rose-600' : 'bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    {u.isBanned ? 'ĐÃ KHÓA (MỞ KHÓA)' : 'KHÓA TÀI KHOẢN'}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
