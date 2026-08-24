@@ -510,6 +510,9 @@ io.on('connection', (socket) => {
       const room = roomManager.createRoom(opponentEntry.profile, rules);
       roomManager.joinRoom(room.id, p);
 
+      room.status = 'in_progress';
+      room.questionStartTime = Date.now();
+
       opponentEntry.socket.join(room.id);
       socket.join(room.id);
 
@@ -517,9 +520,9 @@ io.on('connection', (socket) => {
         roomId: room.id,
         players: [opponentEntry.profile, p],
         opponent: opponentEntry.profile.id === p.id ? opponentEntry.profile : (opponentEntry.profile.id === p.id ? p : opponentEntry.profile),
-        rules: room.rules
+        rules: { ...room.rules, roomId: room.id }
       });
-      console.log('⚡ [MATCHMAKING] Đã ghép thành công 2 người chơi thật:', opponentEntry.profile.username, 'vs', p.username);
+      console.log('⚡ [MATCHMAKING] Đã ghép thành công 2 người chơi thật:', opponentEntry.profile.username, 'vs', p.username, 'Phòng:', room.id);
     } else {
       queue.push({ socket, profile: p, rules });
       socket.emit('match_searching');

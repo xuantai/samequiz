@@ -136,9 +136,10 @@ export class RoomManager {
 
   submitAnswer(roomId, playerId, optionIndex, confirmed, clientTimeMs) {
     const room = this.rooms.get(roomId);
-    if (!room || room.status !== 'in_progress') return;
+    if (!room) return;
+    room.status = 'in_progress';
 
-    const qIndex = room.currentQuestionIndex;
+    const qIndex = room.currentQuestionIndex || 0;
     if (!room.answers[qIndex]) room.answers[qIndex] = {};
 
     const existing = room.answers[qIndex][playerId];
@@ -155,7 +156,7 @@ export class RoomManager {
     }
 
     const now = Date.now();
-    const timeMs = clientTimeMs || (now - room.questionStartTime);
+    const timeMs = clientTimeMs || (now - (room.questionStartTime || now));
 
     room.answers[qIndex][playerId] = {
       playerId,
@@ -169,7 +170,7 @@ export class RoomManager {
       hasSelected: optionIndex !== null,
       optionIndex,
       confirmed: !!confirmed,
-      timeMs
+      timeMs: Math.max(50, timeMs)
     });
 
     // Check if both players confirmed
@@ -187,7 +188,8 @@ export class RoomManager {
 
   useLifeline(roomId, playerId, lifelineType) {
     const room = this.rooms.get(roomId);
-    if (!room || room.status !== 'in_progress') return;
+    if (!room) return;
+    room.status = 'in_progress';
 
     if (!room.lifelineUsage[playerId]) {
       room.lifelineUsage[playerId] = {};

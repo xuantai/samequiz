@@ -48,7 +48,21 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 
   // Round phase
   const [phase, setPhase] = useState<'question' | 'reveal' | 'finished'>('question');
-  const [roundPointsEarned, setRoundPointsEarned] = useState<{ my: number; opponent: number }>({ my: 0, opponent: 0 });
+  const [roundResultDetails, setRoundResultDetails] = useState<{
+    myPoints: number;
+    oppPoints: number;
+    myTimeSec: number;
+    oppTimeSec: number;
+    isMyCorrect: boolean;
+    isOppCorrect: boolean;
+  }>({
+    myPoints: 0,
+    oppPoints: 0,
+    myTimeSec: 0,
+    oppTimeSec: 0,
+    isMyCorrect: false,
+    isOppCorrect: false
+  });
 
   // Refs to avoid any stale closures
   const mySelectedOptionRef = useRef<number | null>(null);
@@ -308,6 +322,9 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
     let myPoints = 0;
     let oppPoints = 0;
 
+    const mySec = Math.max(0.1, Number((myTime / 1000).toFixed(2)));
+    const oppSec = Math.max(0.1, Number((oppTime / 1000).toFixed(2)));
+
     // Accurate 3-1-0 Scoring Rule
     if (isMyCorrect && isOppCorrect) {
       if (myTime <= oppTime) {
@@ -344,7 +361,14 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
 
     setMyScore(prev => prev + myPoints);
     setOpponentScore(prev => prev + oppPoints);
-    setRoundPointsEarned({ my: myPoints, opponent: oppPoints });
+    setRoundResultDetails({
+      myPoints,
+      oppPoints,
+      myTimeSec: mySec,
+      oppTimeSec: oppSec,
+      isMyCorrect,
+      isOppCorrect
+    });
 
     // Track for profile radar
     setMatchHistory(prev => [...prev, { categoryIds: q.categoryIds, isCorrect: isMyCorrect }]);
@@ -719,21 +743,70 @@ export const DuelArena: React.FC<DuelArenaProps> = ({
         </div>
       )}
 
-      {/* REVEAL PHASE BANNER */}
+      {/* REVEAL PHASE BANNER WITH PRECISE TIMING & BREAKDOWN */}
       {phase === 'reveal' && (
-        <div className="mb-4 p-4 rounded-2xl bg-slate-900/90 border border-slate-700 text-center animate-fade-in space-y-2">
-          <div className="flex items-center justify-center gap-6 font-mono font-black text-sm sm:text-base">
-            <span className={roundPointsEarned.my === 3 ? 'text-emerald-400 text-lg' : roundPointsEarned.my === 1 ? 'text-cyan-400' : 'text-slate-500'}>
-              Bạn: +{roundPointsEarned.my} điểm {roundPointsEarned.my === 3 && '⚡ (Nhanh Nhất!)'}
-            </span>
-            <span className="text-slate-600">|</span>
-            <span className={roundPointsEarned.opponent === 3 ? 'text-emerald-400 text-lg' : roundPointsEarned.opponent === 1 ? 'text-fuchsia-400' : 'text-slate-500'}>
-              Đối thủ: +{roundPointsEarned.opponent} điểm {roundPointsEarned.opponent === 3 && '⚡ (Nhanh Nhất!)'}
-            </span>
+        <div className="mb-4 p-4 sm:p-5 rounded-3xl bg-slate-900/95 border border-cyan-500/40 text-center animate-fade-in space-y-3 shadow-2xl shadow-cyan-500/10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+            {/* Bạn */}
+            <div className={`p-3.5 rounded-2xl border transition-all ${
+              roundResultDetails.myPoints === 3
+                ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300 shadow-lg shadow-emerald-500/20'
+                : roundResultDetails.myPoints === 1
+                ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300'
+                : 'bg-slate-950/60 border-slate-800 text-slate-400'
+            }`}>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Bạn</div>
+              <div className="text-2xl font-black font-mono mt-0.5">
+                +{roundResultDetails.myPoints} điểm {roundResultDetails.myPoints === 3 && '⚡ (Nhanh Nhất!)'}
+              </div>
+              <div className="text-xs font-semibold mt-1">
+                {roundResultDetails.isMyCorrect ? (
+                  <span>
+                    ⏱️ Thời gian chốt: <strong className="text-white font-mono">{roundResultDetails.myTimeSec}s</strong>
+                    {roundResultDetails.myPoints === 1 && (
+                      <span className="text-amber-400 block text-[11px] font-bold mt-0.5">
+                        (Đúng nhưng chậm hơn {(roundResultDetails.myTimeSec - roundResultDetails.oppTimeSec).toFixed(2)}s)
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-rose-400">❌ Trả lời sai / Hết giờ ({roundResultDetails.myTimeSec}s)</span>
+                )}
+              </div>
+            </div>
+
+            {/* Đối Thủ */}
+            <div className={`p-3.5 rounded-2xl border transition-all ${
+              roundResultDetails.oppPoints === 3
+                ? 'bg-emerald-500/15 border-emerald-400 text-emerald-300 shadow-lg shadow-emerald-500/20'
+                : roundResultDetails.oppPoints === 1
+                ? 'bg-fuchsia-500/15 border-fuchsia-400 text-fuchsia-300'
+                : 'bg-slate-950/60 border-slate-800 text-slate-400'
+            }`}>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{opponentProfile.username}</div>
+              <div className="text-2xl font-black font-mono mt-0.5">
+                +{roundResultDetails.oppPoints} điểm {roundResultDetails.oppPoints === 3 && '⚡ (Nhanh Nhất!)'}
+              </div>
+              <div className="text-xs font-semibold mt-1">
+                {roundResultDetails.isOppCorrect ? (
+                  <span>
+                    ⏱️ Thời gian chốt: <strong className="text-white font-mono">{roundResultDetails.oppTimeSec}s</strong>
+                    {roundResultDetails.oppPoints === 1 && (
+                      <span className="text-amber-400 block text-[11px] font-bold mt-0.5">
+                        (Đúng nhưng chậm hơn {(roundResultDetails.oppTimeSec - roundResultDetails.myTimeSec).toFixed(2)}s)
+                      </span>
+                    )}
+                  </span>
+                ) : (
+                  <span className="text-rose-400">❌ Trả lời sai / Chưa chốt ({roundResultDetails.oppTimeSec}s)</span>
+                )}
+              </div>
+            </div>
           </div>
+
           {currentQ.explanation && (
-            <p className="text-xs text-slate-300 max-w-2xl mx-auto italic">
-              💡 Giải thích: {currentQ.explanation}
+            <p className="text-xs text-slate-300 max-w-2xl mx-auto italic bg-slate-950/50 p-2.5 rounded-xl border border-slate-800/80">
+              💡 <strong>Giải thích:</strong> {currentQ.explanation}
             </p>
           )}
         </div>
